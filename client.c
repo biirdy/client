@@ -4,10 +4,15 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <time.h>
+#include <sys/time.h>
+#include "srrp.h"
 
 int main(int argc, char**argv){
 	int clientSocket;
 	char buffer[1024];
+	char recv_buff[1024];
+	char send_buff[1024];
 	struct sockaddr_in serverAddr;
 	socklen_t addr_size;
 
@@ -32,15 +37,60 @@ int main(int argc, char**argv){
 		return 0;
 	}
 
-	while(1){
-		sleep(1);
+	//timeout
+	struct timeval tv;
+
+	int bytes = 1;
+	//receive loop
+	while(bytes){
+		//sleep(1);
+		
+		//struct srrp_response * response;
+		//response = (struct srrp_response *) buffer;
+		//response->id 		= 10;
+		//response->length 	= 15;  
+
 		/*---- Read the message from the server into the buffer ----*/
 		//recv(clientSocket, buffer, 1024, 0);
-		strcpy(buffer, "Heartbeat");
-		send(clientSocket,buffer,13,0);
+		//strcpy(buffer, "Heartbeat");
+		//send(clientSocket,buffer, 32,0);
 
 		/*---- Print the received message ----*/
-		//printf("Data received: %s",buffer); 
+		//printf("Data received: %s",buffer);
+
+		fd_set rfds;
+		FD_ZERO(&rfds);
+		FD_SET (clientSocket, &rfds);
+
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+				
+		int ready = select(clientSocket + 1, &rfds, NULL, NULL, &tv);
+
+		if(ready == -1 ){
+
+		}else if(ready){
+			bytes = recv(clientSocket,recv_buff, sizeof(recv_buff),0);
+			struct srrp_request * request;
+			request = (struct srrp_request *) recv_buff;
+
+			if(request->type ==1 ){
+				//heatbeat request
+				printf("Received hb request\n");
+				//build response
+				struct srrp_response * response;
+				response = (struct srrp_response *) send_buff;
+				response->id = 0;
+				response->length = 0;
+				send(clientSocket, send_buff, sizeof(send_buff), 0);
+			}else{
+				//unrecognised data
+				//do nothing --- should log
+			}
+		}else{
+			//timeout
+			//dont care about timeout --- keep running
+		}
 	}
 
 	close(clientSocket);  
