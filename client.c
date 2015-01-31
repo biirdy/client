@@ -108,6 +108,8 @@ int main(int argc, char**argv){
 					}else{
 						printf("iperf successfull\n");
 					}
+
+					exit(0);
 				}
 
 				
