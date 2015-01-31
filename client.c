@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -58,6 +60,8 @@ int main(int argc, char**argv){
 		/*---- Print the received message ----*/
 		//printf("Data received: %s",buffer);
 
+		FILE *fp;
+
 		fd_set rfds;
 		FD_ZERO(&rfds);
 		FD_SET (clientSocket, &rfds);
@@ -74,7 +78,7 @@ int main(int argc, char**argv){
 			struct srrp_request * request;
 			request = (struct srrp_request *) recv_buff;
 
-			if(request->type ==1 ){
+			if(request->type == SRRP_HB){
 				//heatbeat request
 				printf("Received hb request\n");
 				//build response
@@ -83,6 +87,31 @@ int main(int argc, char**argv){
 				response->id = 0;
 				response->length = 0;
 				send(clientSocket, send_buff, sizeof(send_buff), 0);
+			}else if(request->type == SRRP_BW){
+				printf("Received iperf request\n");
+
+				fp = popen("iperf -c jbird.me -y C", "r");
+				if(fp == NULL){
+					printf("Failed to run iperf command\n");
+				}
+
+				printf("Running iperf command\n");
+
+				char result[100];
+				while(fgets(result, sizeof(result)-1, fp) != NULL){
+					printf("RESULT:%s\n", result);
+				}
+
+				if(WEXITSTATUS(pclose(fp)) > 0){
+					printf("iperf failed\n");
+				}else{
+					printf("iperf successfull\n");
+				}
+
+				/*int i;
+				for(i = 0; i < request->length; i++){
+					printf("Param: %d\n", request->params[i].value);
+				}*/
 			}else{
 				//unrecognised data
 				//do nothing --- should log
