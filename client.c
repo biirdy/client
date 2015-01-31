@@ -90,23 +90,27 @@ int main(int argc, char**argv){
 			}else if(request->type == SRRP_BW){
 				printf("Received iperf request\n");
 
-				fp = popen("iperf -c jbird.me -y C", "r");
-				if(fp == NULL){
-					printf("Failed to run iperf command\n");
+				if(fork() == 0){
+					fp = popen("iperf -c jbird.me -y C", "r");
+					if(fp == NULL){
+						printf("Failed to run iperf command\n");
+					}
+
+					printf("Running iperf command\n");
+
+					char result[100];
+					while(fgets(result, sizeof(result)-1, fp) != NULL){
+						printf("RESULT:%s\n", result);
+					}
+
+					if(WEXITSTATUS(pclose(fp)) > 0){
+						printf("iperf failed\n");
+					}else{
+						printf("iperf successfull\n");
+					}
 				}
 
-				printf("Running iperf command\n");
-
-				char result[100];
-				while(fgets(result, sizeof(result)-1, fp) != NULL){
-					printf("RESULT:%s\n", result);
-				}
-
-				if(WEXITSTATUS(pclose(fp)) > 0){
-					printf("iperf failed\n");
-				}else{
-					printf("iperf successfull\n");
-				}
+				
 
 				/*int i;
 				for(i = 0; i < request->length; i++){
