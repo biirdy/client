@@ -107,9 +107,10 @@ int main(int argc, char**argv){
 						printf("iperf failed\n");
 					}else{
 						printf("iperf successfull\n");
+						_exit(1);
 					}
 
-					exit(0);
+					_exit(0);
 				}
 
 				
