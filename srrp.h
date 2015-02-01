@@ -46,8 +46,8 @@ struct srrp_request{
 
 //SRRP result 
 struct srrp_result{
-	uint16_t	result;
-	uint16_t	value;
+	uint32_t	result;
+	uint32_t	value;
 } __attribute__((__packed__));
 
 //SRRP respone success codes
