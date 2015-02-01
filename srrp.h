@@ -40,9 +40,11 @@ struct srrp_request{
 #define SRRP_RES_RTTMIN 3       // RTT min
 #define SRRP_RES_RTTDEV 4       // RTT min
 #define SRRP_RES_BW 	5       // Bandwidth
-#define SRRP_RES_JTR	6       // Jitter
-#define SRRP_RES_PKLS 	7      	// Packet loss
-#define SRRP_RES_HOP 	8       // Traceroute hop
+#define SRRP_RES_DUR	6		// Duration
+#define SRRP_RES_SIZE	7		// Size
+#define SRRP_RES_JTR	8       // Jitter
+#define SRRP_RES_PKLS 	9      	// Packet loss
+#define SRRP_RES_HOP 	10      // Traceroute hop
 
 //SRRP result 
 struct srrp_result{

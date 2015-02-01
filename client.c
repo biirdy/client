@@ -124,28 +124,44 @@ int main(int argc, char**argv){
 						printf("iperf successfull\n");
 						
 						//split up results
-						char * tm, * src, * src_prt, * dst, * dst_port, * dur, * data; 
-						int bps;
+						char * tm, * src, * src_prt, * dst, * dst_port;
+						int bps, data;
+						double dur;
 						tm = strtok(result, ",");
 						src = strtok(NULL, ",");
 						src_prt = strtok(NULL, ",");
 						dst = strtok(NULL, ",");
 						dst_port = strtok(NULL, ",");
-						dur = strtok(NULL, ",");
-						data = strtok(NULL, ",");
+						strtok(NULL, "-");
+						dur = atof(strtok(NULL, ","));
+						data = atoi(strtok(NULL, ","));
 						bps = atoi(strtok(NULL, ","));
 
 						//build response
 						struct srrp_response * response;
 						response = (struct srrp_response *) send_buff;
 						response->id = request->id;
-						response->length = 1;
+						response->length = 3;
 						response->success = SRRP_SCES;
 
+						//add results
+						//bandwidth
 						struct srrp_result bw;
 						bw.result = SRRP_RES_BW;
 						bw.value = bps;
 						response->results[0] = bw;
+
+						//duration
+						struct srrp_result duration;
+						duration.result = SRRP_RES_DUR;
+						duration.value = dur;
+						response->results[1] = duration;
+
+						//bytes
+						struct srrp_result size;
+						size.result = SRRP_RES_SIZE;
+						size.value = data;
+						resonpse->results[2] = size;
 
 						printf("B/s = %d\n",bps);
 
