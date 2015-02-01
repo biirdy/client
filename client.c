@@ -156,12 +156,13 @@ int main(int argc, char**argv){
 						duration.result = SRRP_RES_DUR;
 						duration.value = dur;
 						response->results[1] = duration;
+						printf("SIZE=%d\n", response->results[1].value);
 
 						//bytes
 						struct srrp_result size;
 						size.result = SRRP_RES_SIZE;
 						size.value = data;
-						resonpse->results[2] = size;
+						response->results[2] = size;
 
 						printf("B/s = %d\n",bps);
 
