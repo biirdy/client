@@ -114,7 +114,7 @@ int main(int argc, char**argv){
 					int exit_status = WEXITSTATUS(pclose(fp));
 					printf("iperf exit status = %d\n", exit_status);
 
-					if(exit_status > 0){
+					if(exit_status != 255){
 						printf("iperf failed\n");
 
 						//should send resonpse with failed success code
