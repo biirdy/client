@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/time.h>
+#include <signal.h>
+#include <sys/wait.h>
 #include "srrp.h"
 
 int main(int argc, char**argv){
@@ -109,7 +111,7 @@ int main(int argc, char**argv){
 						printf("ieprf result:%s\n", result);
 					}
 
-					int exit_status = WEXITSTATUS(pclose());
+					int exit_status = WEXITSTATUS(pclose(fp));
 					printf("iperf exit status = %d\n", exit_status);
 
 					if(exit_status > 0){
