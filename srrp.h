@@ -59,6 +59,6 @@ struct srrp_result{
 struct srrp_response{
 	uint32_t			id;
 	uint16_t			length;
-	uint16_t			seccuess;
+	uint16_t			success;
 	struct srrp_result	results[ ];
 } __attribute__((__packed__));

@@ -18,6 +18,12 @@ int main(int argc, char**argv){
 	struct sockaddr_in serverAddr;
 	socklen_t addr_size;
 
+	//casue zombies to be reaped automatically 
+	if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
+ 		perror(0);
+  		exit(1);
+	}
+
 	/*---- Create the socket. The three arguments are: ----*/
 	/* 1) Internet domain 2) Stream socket 3) Default protocol (TCP in this case) */
 	clientSocket = socket(PF_INET, SOCK_STREAM, 0);
@@ -100,20 +106,51 @@ int main(int argc, char**argv){
 
 					char result[100];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){
-						printf("RESULT:%s\n", result);
+						printf("ieprf result:%s\n", result);
 					}
 
 					if(WEXITSTATUS(pclose(fp)) > 0){
 						printf("iperf failed\n");
+
+						//should send resonpse with failed success code
+
+						_exit(1);
 					}else{
 						printf("iperf successfull\n");
-						_exit(1);
+						
+						//split up results
+						char * tm, * src, * src_prt, * dst, * dst_port, * dur, * data; 
+						int bps;
+						tm = strtok(result, ",");
+						src = strtok(NULL, ",");
+						src_prt = strtok(NULL, ",");
+						dst = strtok(NULL, ",");
+						dst_port = strtok(NULL, ",");
+						dur = strtok(NULL, ",");
+						data = strtok(NULL, ",");
+						bps = atoi(strtok(NULL, ","));
+
+						//build response
+						struct srrp_response * response;
+						response = (struct srrp_response *) send_buff;
+						response->id = request->id;
+						response->length = 1;
+						response->success = SRRP_SCES;
+
+						struct srrp_result bw;
+						bw.result = SRRP_RES_BW;
+						bw.value = bps;
+						response->results[0] = bw;
+
+						printf("B/s = %d\n",bps);
+
+						printf("Sending iperf result\n");
+
+						send(clientSocket, send_buff, sizeof(send_buff), 0);
 					}
 
 					_exit(0);
 				}
-
-				
 
 				/*int i;
 				for(i = 0; i < request->length; i++){
