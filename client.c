@@ -109,7 +109,10 @@ int main(int argc, char**argv){
 						printf("ieprf result:%s\n", result);
 					}
 
-					if(WEXITSTATUS(pclose(fp)) > 0){
+					int exit_status = WEXITSTATUS(pclose());
+					printf("iperf exit status = %d\n", exit_status);
+
+					if(exit_status > 0){
 						printf("iperf failed\n");
 
 						//should send resonpse with failed success code
