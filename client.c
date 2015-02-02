@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <stdarg.h>
 #include "srrp.h"
 
 FILE* logs;
