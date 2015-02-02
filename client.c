@@ -12,7 +12,38 @@
 #include <sys/wait.h>
 #include "srrp.h"
 
+FILE* logs;
+
+void client_log(const char * type, const char * fmt, ...){
+	//format message
+	va_list args; 
+	va_start(args, fmt);
+
+	char msg[100];
+	vsprintf(msg, fmt, args);
+
+	va_end(args);
+
+	//get timestamp
+	time_t ltime;
+	struct tm result;
+	char stime[32];
+	ltime = time(NULL);
+	localtime_r(&ltime, &result);
+	asctime_r(&result, stime);
+	strtok(stime, "\n");			
+
+	fprintf(logs, "%s - Client - [%s] - %s\n", stime, type, msg);		//write to log
+	fflush(logs);
+
+	printf("%s - %s\n", type, msg);
+}
+
 int main(int argc, char**argv){
+
+	//log files
+	logs = fopen("/var/log/tnp/client.log", "a+");
+
 	int clientSocket;
 	char buffer[1024];
 	char recv_buff[1024];
@@ -43,9 +74,11 @@ int main(int argc, char**argv){
 	/*---- Connect the socket to the server using the address struct ----*/
 	addr_size = sizeof serverAddr;
 	if(connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size)){
-		printf("Error connecting: %s\n", strerror(errno));
+		client_log("Error", "Connecting to server - %s", strerror(errno));
 		return 0;
 	}
+
+	client_log("Info", "Connected to server");
 
 	//timeout
 	struct timeval tv;
@@ -95,33 +128,30 @@ int main(int argc, char**argv){
 				response->id = 0;
 				response->length = 0;
 				send(clientSocket, send_buff, sizeof(send_buff), 0);
-			}else if(request->type == SRRP_BW){
-				printf("Received iperf request\n");
+			}else if(request->type == SRRP_BW){				
+				client_log("Info", "Recevived iperf request");
 
 				if(fork() == 0){
 					fp = popen("iperf -c jbird.me -y C", "r");
 					if(fp == NULL){
-						printf("Failed to run iperf command\n");
+						client_log("Error", "Failed to run iperf command");
+						_exit(1);
 					}
 
 					printf("Running iperf command\n");
 
 					char result[100];
-					while(fgets(result, sizeof(result)-1, fp) != NULL){
-						printf("ieprf result:%s\n", result);
-					}
+					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
 					int exit_status = WEXITSTATUS(pclose(fp));
-					printf("iperf exit status = %d\n", exit_status);
-
 					if(exit_status != 255){
-						printf("iperf failed\n");
+						client_log("Error", "iperf failed exit status %d", exit_status);
 
 						//should send resonpse with failed success code
 
 						_exit(1);
 					}else{
-						printf("iperf successfull\n");
+						client_log("Info", "iperf successfull");
 						
 						//split up results
 						char * tm, * src, * src_prt, * dst, * dst_port;
@@ -156,17 +186,14 @@ int main(int argc, char**argv){
 						duration.result = SRRP_RES_DUR;
 						duration.value = dur;
 						response->results[1] = duration;
-						printf("SIZE=%d\n", response->results[1].value);
-
+	
 						//bytes
 						struct srrp_result size;
 						size.result = SRRP_RES_SIZE;
 						size.value = data;
 						response->results[2] = size;
 
-						printf("B/s = %d\n",bps);
-
-						printf("Sending iperf result\n");
+						client_log("Info", "Sending iperf results");
 
 						send(clientSocket, send_buff, sizeof(send_buff), 0);
 					}
@@ -174,20 +201,20 @@ int main(int argc, char**argv){
 					_exit(0);
 				}
 
-				/*int i;
-				for(i = 0; i < request->length; i++){
-					printf("Param: %d\n", request->params[i].value);
-				}*/
 			}else{
 				//unrecognised data
-				//do nothing --- should log
+				client_log("Error", "Recevied unrecognised data");
 			}
 		}else{
 			//timeout
 			//dont care about timeout --- keep running
+			client_log("Error", "Timeout")
 		}
 	}
 
+	client_log("Info", "Recevied empty data, closing connection");
+
+	fclose(logs);
 	close(clientSocket);  
 
 	return 0;
