@@ -208,7 +208,7 @@ int main(int argc, char**argv){
 		}else{
 			//timeout
 			//dont care about timeout --- keep running
-			client_log("Error", "Timeout")
+			client_log("Error", "Timeout");
 		}
 	}
 
