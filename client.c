@@ -220,7 +220,7 @@ int main(int argc, char**argv){
 
 				if(fork() == 0){
 					
-					char * command_fmt = "ping -c %s %d";
+					char * command_fmt = "ping -c %d %s";
 					char command[100];
 
 					//default params
@@ -230,7 +230,7 @@ int main(int argc, char**argv){
 					//get params
 
 					//build command
-					sprintf(command, command_fmt, dst_addr, itterations);
+					sprintf(command, command_fmt, itterations, dst_addr);
 
 					fp = popen(command , "r");
 					if(fp == NULL){
