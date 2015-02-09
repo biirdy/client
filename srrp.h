@@ -64,3 +64,57 @@ struct srrp_response{
 	uint16_t			success;
 	struct srrp_result	results[ ];
 } __attribute__((__packed__));
+
+/*
+*
+* Functions for parsing tools output into srrp_responses
+*
+*/
+
+/*
+* response 	-
+* output 	- the last line outputted by ping. String is destroyed.
+*/
+int parse_ping(int id, struct srrp_response * response, char * output){
+
+	if(response==NULL || output==NULL)
+		return 1;
+
+	strtok(output, "=");
+
+	//header
+	response->id = id;
+	response->length = 4;
+	response->success = SRRP_SCES;
+
+	//add results
+	struct srrp_result min_result;
+	min_result.result = SRRP_RES_RTTMIN;
+	min_result.value = atoi(strtok(NULL, "/"));
+	response->results[0] = min_result;
+
+	struct srrp_result avg_result;
+	avg_result.result = SRRP_RES_RTTAVG;
+	avg_result.value = atoi(strtok(NULL, "/"));
+	response->results[1] = avg_result;
+
+	struct srrp_result max_result;
+	max_result.result = SRRP_RES_RTTMAX;
+	max_result.value = atoi(strtok(NULL, "/"));
+	response->results[2] = max_result;
+
+	struct srrp_result dev_result;
+	dev_result.result = SRRP_RES_RTTDEV;
+	dev_result.value = atoi(strtok(NULL, "/"));
+	response->results[3] = dev_result;
+
+	return 0;
+}
+
+/*
+* response 	-
+* output 	- a comma seperated string produced by iperf using the '-y C' flag
+*/
+int parse_iperf(struct srrp_response * response, char * output){
+	return 1;
+}

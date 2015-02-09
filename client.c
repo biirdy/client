@@ -133,14 +133,27 @@ int main(int argc, char**argv){
 				client_log("Info", "Recevived iperf request");
 
 				if(fork() == 0){
-					fp = popen("iperf -c jbird.me -y C", "r");
+
+					char * cmd_fmt = "iperf -c %s -y C";
+					char cmd[100];
+
+					//default params
+					char * dst_addr = "jbird.me";
+
+					//get parameters
+
+					//build command
+					sprintf(cmd, cmd_fmt, dst_addr);
+
+					fp = popen(cmd, "r");
 					if(fp == NULL){
-						client_log("Error", "Failed to run iperf command");
+						client_log("Error", "Failed to run command '%s'", cmd);
 						_exit(1);
 					}
 
 					printf("Running iperf command\n");
 
+					//get otuput	-	single line because of -y C flage
 					char result[100];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
@@ -201,6 +214,55 @@ int main(int argc, char**argv){
 
 					_exit(0);
 				}
+
+			}else if(request->type == SRRP_RTT){
+				client_log("Info", "Received ping request");
+
+				if(fork() == 0){
+					
+					char * command_fmt = "ping -c %s %d";
+					char command[100];
+
+					//default params
+					char * dst_addr = "jbird.me";
+					int itterations = 5;
+
+					//get params
+
+					//build command
+					sprintf(command, command_fmt, dst_addr, itterations);
+
+					fp = popen(command , "r");
+					if(fp == NULL){
+						client_log("Error", "Failed to run command %s" command);
+
+						_exit(1);
+					}
+
+					//get otuput	-	single line because of -y C flage
+					char result[100];
+					while(fgets(result, sizeof(result)-1, fp) != NULL){}
+
+					int exit_status = WEXITSTATUS(pclose(fp));
+					if(exit_status > 0){
+						client_log("Error", "command failed exit status %d", exit_status);
+
+						//should respond
+
+					}else{
+						struct srrp_response * response = (struct srrp_response *) send_buff;
+
+						if(parse_ping(request->id, response, result)){
+							client_log("Error", "Failed to parse ping response");
+							_exit(0);
+						}
+
+						send(clientSocket, send_buff, sizeof(send_buff), 0);
+
+						_exit(0);
+					}
+
+				}	
 
 			}else{
 				//unrecognised data
