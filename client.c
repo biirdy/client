@@ -242,11 +242,11 @@ int main(int argc, char**argv){
 					//get otuput	-	single line because of -y C flage
 					char result[100];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){
-						printf("%s\n", result);
+						//printf("%s\n", result);
 					}
 
 					int exit_status = WEXITSTATUS(pclose(fp));
-					if(exit_status > 0){
+					if(exit_status != 255){
 						client_log("Error", "command failed exit status %d", exit_status);
 
 						//should respond
