@@ -268,7 +268,7 @@ int main(int argc, char**argv){
 
 			}else{
 				//unrecognised data
-				client_log("Error", "Recevied unrecognised data");
+				client_log("Error", "Recevied unrecognised data - %d", request->type);
 			}
 		}else{
 			//timeout
