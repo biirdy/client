@@ -130,7 +130,7 @@ int main(int argc, char**argv){
 				response->length = 0;
 				send(clientSocket, send_buff, sizeof(send_buff), 0);
 			}else if(request->type == SRRP_BW){				
-				client_log("Info", "Recevived iperf request");
+				client_log("Info", "Recevived iperf request - %d bytes", bytes);
 
 				if(fork() == 0){
 
@@ -165,7 +165,6 @@ int main(int argc, char**argv){
 
 						_exit(1);
 					}else{
-						client_log("Info", "iperf successfull");
 						
 						//split up results
 						char * tm, * src, * src_prt, * dst, * dst_port;
@@ -216,7 +215,7 @@ int main(int argc, char**argv){
 				}
 
 			}else if(request->type == SRRP_RTT){
-				client_log("Info", "Received ping request");
+				client_log("Info", "Received ping request - %d bytes", bytes);
 
 				if(fork() == 0){
 					
@@ -268,7 +267,7 @@ int main(int argc, char**argv){
 
 			}else{
 				//unrecognised data
-				client_log("Error", "Recevied unrecognised data - %d", request->type);
+				client_log("Error", "Recevied unrecognised data - %d - %d bytes", request->type, bytes);
 			}
 		}else{
 			//timeout
