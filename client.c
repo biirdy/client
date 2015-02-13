@@ -108,7 +108,7 @@ int main(int argc, char**argv){
 		FD_ZERO(&rfds);
 		FD_SET (clientSocket, &rfds);
 
-		tv.tv_sec = 5;
+		tv.tv_sec = 60;
 		tv.tv_usec = 0;
 				
 		int ready = select(clientSocket + 1, &rfds, NULL, NULL, &tv);
