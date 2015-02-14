@@ -134,7 +134,7 @@ int main(int argc, char**argv){
 
 				if(fork() == 0){
 
-					char * cmd_fmt = "iperf -c %s -d %d -y C";
+					char * cmd_fmt = "iperf -c %s -t %d -y C";
 					char cmd[100];
 
 					//default params
