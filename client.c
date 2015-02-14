@@ -134,16 +134,27 @@ int main(int argc, char**argv){
 
 				if(fork() == 0){
 
-					char * cmd_fmt = "iperf -c %s -y C";
+					char * cmd_fmt = "iperf -c %s -d %d -y C";
 					char cmd[100];
 
 					//default params
 					char * dst_addr = "jbird.me";
+					int dur = 10;
 
 					//get parameters
+					int i;
+					for(i = 0; i < request->length; i++){
+						if(request->params[i].param == SRRP_DUR){
+							dur = request->params[i].value;
+						}else{
+							client_log("Error", "Invalid iperf parameter");
+						}
+					}
 
 					//build command
-					sprintf(cmd, cmd_fmt, dst_addr);
+					sprintf(cmd, cmd_fmt, dst_addr, dur);
+
+					printf("%s\n", cmd);
 
 					fp = popen(cmd, "r");
 					if(fp == NULL){
