@@ -73,6 +73,7 @@ struct srrp_response{
 */
 
 /*
+* id 		- 
 * response 	-
 * output 	- the last line outputted by ping. String is destroyed.
 */
@@ -118,4 +119,59 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 */
 int parse_iperf(struct srrp_response * response, char * output){
 	return 1;
+}
+
+/*
+*
+*
+*/
+int parse_udp(int id, struct srrp_response *response, char * output){
+
+	if(response==NULL || output==NULL)
+		return 1;
+
+	strtok(output, ",");	//connection
+	strtok(NULL, ",");		//ip
+	strtok(NULL, ",");		//port
+	strtok(NULL, ",");		//ip
+	strtok(NULL, ",");		//port
+	strtok(NULL, ",");		//id
+	strtok(NULL, "-");		//time 
+
+	//header
+	response->id = id;
+	response->length = 5;
+	response->success = SRRP_SCES;
+
+	//add results
+	struct srrp_result dur_result;
+	dur_result.result = SRRP_RES_DUR;
+	dur_result.value = atof(strtok(NULL, ","));
+	response->results[0] = dur_result;
+
+	struct srrp_result size_result;
+	size_result.result = SRRP_RES_SIZE;
+	size_result.value = atof(strtok(NULL, ","));
+	response->results[1] = size_result;	
+
+	struct srrp_result bw_result;
+	bw_result.result = SRRP_RES_BW;
+	bw_result.value = atof(strtok(NULL, ","));
+	response->results[2] = bw_result;
+
+	struct srrp_result jit_result;
+	jit_result.result = SRRP_RES_JTR;
+	jit_result.value = atof(strtok(NULL, ","));
+	response->results[3] = jit_result;
+
+
+	strtok(NULL, ",");		//recvd datagras
+	strtok(NULL, ",");		//sent datagrams
+
+	struct srrp_result pkls_result;
+	pkls_result.result = SRRP_RES_PKLS;
+	pkls_result.value = atof(strtok(NULL, ","));
+	response->results[4] = pkls_result;
+
+	return 0;
 }

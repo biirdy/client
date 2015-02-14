@@ -274,7 +274,46 @@ int main(int argc, char**argv){
 			}else if(request->type == SRRP_UDP){
 				client_log("Info", "Received UDP iperf request");
 
-				//do nothing
+				if(fork() == 0){
+					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %d -l %d -t %d -y C";
+					char cmd[100];
+
+					//default params
+					char * dst_addr = "jbird.me";
+					int speed = 1;
+					int size = 1470;
+					int duration = 10;
+
+					sprintf(cmd, cmd_fmt, dst_addr, speed, size, duration);
+
+					printf("%s\n", cmd);
+
+					//get otuput	-	single line because of -y C flage
+					char result[100];
+					while(fgets(result, sizeof(result)-1, fp) != NULL){
+						printf("%s\n", result);
+					}
+
+					int exit_status = WEXITSTATUS(pclose(fp));
+					if(exit_status != 255){
+						client_log("Error", "udp iperf failed exit status %d", exit_status);
+
+						//should send resonpse with failed success code
+
+						_exit(1);
+					}else{
+						struct srrp_response * response = (struct srrp_response *) send_buff;
+
+						if(parse_udp(request->id, response, result)){
+							client_log("Error", "Failed to parse udp response");
+							_exit(0);
+						}
+
+						send(clientSocket, send_buff, sizeof(send_buff), 0);
+
+						_exit(0);
+					}
+				}
 
 			}else{
 				//unrecognised data
