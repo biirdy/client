@@ -288,6 +288,13 @@ int main(int argc, char**argv){
 
 					printf("%s\n", cmd);
 
+					fp = popen(command , "r");
+					if(fp == NULL){
+						client_log("Error", "Failed to run command %s", command);
+
+						_exit(1);
+					}
+
 					//get otuput	-	single line because of -y C flage
 					char result[100];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){
