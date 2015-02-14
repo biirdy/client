@@ -239,6 +239,8 @@ int main(int argc, char**argv){
 					//build command
 					sprintf(command, command_fmt, itterations, dst_addr);
 
+					printf("%s\n", command);
+
 					fp = popen(command , "r");
 					if(fp == NULL){
 						client_log("Error", "Failed to run command %s", command);
