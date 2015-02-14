@@ -288,7 +288,7 @@ int main(int argc, char**argv){
 
 					printf("%s\n", cmd);
 
-					fp = popen(command , "r");
+					fp = popen(cmd , "r");
 					if(fp == NULL){
 						client_log("Error", "Failed to run command %s", command);
 
