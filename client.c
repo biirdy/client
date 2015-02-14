@@ -290,7 +290,7 @@ int main(int argc, char**argv){
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
-						client_log("Error", "Failed to run command %s", command);
+						client_log("Error", "Failed to run command %s", cmd);
 
 						_exit(1);
 					}
