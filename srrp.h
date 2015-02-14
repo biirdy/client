@@ -20,10 +20,9 @@ struct srrp_param{
 #define SRRP_HB		1       // Heartbeat
 #define SRRP_BW		2       // Bandwidth
 #define SRRP_RTT	3       // Round trip time
-#define SRRP_JTR	4       // Jitter
+#define SRRP_UDP	4       // UDP iperf - reports packet loss and jitter
 #define SRRP_DNS	5       // DNS status 
 #define SRRP_TRT	6       // Traceroute
-#define SRRP_PKLS	7       // Packet loss 
 
 //SRRP request
 struct srrp_request{

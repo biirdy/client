@@ -87,20 +87,6 @@ int main(int argc, char**argv){
 	int bytes = 1;
 	//receive loop
 	while(bytes){
-		//sleep(1);
-		
-		//struct srrp_response * response;
-		//response = (struct srrp_response *) buffer;
-		//response->id 		= 10;
-		//response->length 	= 15;  
-
-		/*---- Read the message from the server into the buffer ----*/
-		//recv(clientSocket, buffer, 1024, 0);
-		//strcpy(buffer, "Heartbeat");
-		//send(clientSocket,buffer, 32,0);
-
-		/*---- Print the received message ----*/
-		//printf("Data received: %s",buffer);
 
 		FILE *fp;
 
@@ -285,6 +271,10 @@ int main(int argc, char**argv){
 					}
 
 				}	
+			}else if(request->type == SRRP_UDP){
+				client_log("Info", "Received UDP iperf request");
+
+				//do nothing
 
 			}else{
 				//unrecognised data
