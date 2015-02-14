@@ -229,8 +229,8 @@ int main(int argc, char**argv){
 					//load in params
 					int i;
 					for(i = 0; i < request->length; i++){
-						if(request.params[i]->param == SRRP_ITTR){
-							itterations = request.params[i]->value;
+						if(request->params[i].param == SRRP_ITTR){
+							itterations = request->params[i].value;
 						}else{
 							client_log("Error", "Invalid ping parameter");
 						}
