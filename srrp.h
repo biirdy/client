@@ -7,6 +7,8 @@
 #define SRRP_SIZE	1       // Size
 #define SRRP_ITTR   2       // Itterations
 #define SRRP_PRTO   3       // Protocol
+#define SRRP_SPEED	4		// Speed
+#define SRRP_DUR 	5		// Duration
 
 //SRRP parameter
 struct srrp_param{

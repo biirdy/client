@@ -226,7 +226,15 @@ int main(int argc, char**argv){
 					char * dst_addr = "jbird.me";
 					int itterations = 5;
 
-					//get params
+					//load in params
+					int i;
+					for(i = 0; i < request->length; i++){
+						if(request.params[i]->param == SRRP_ITTR){
+							itterations = request.params[i]->value;
+						}else{
+							client_log("Error", "Invalid ping parameter");
+						}
+					}
 
 					//build command
 					sprintf(command, command_fmt, itterations, dst_addr);
