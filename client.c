@@ -340,6 +340,8 @@ int main(int argc, char**argv){
 
 						send(clientSocket, send_buff, sizeof(send_buff), 0);
 
+						printf("SENT UDP RESPONSE\n");
+
 						_exit(0);
 					}
 				}
