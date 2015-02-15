@@ -328,7 +328,7 @@ int main(int argc, char**argv){
 					}else{
 						struct srrp_response * response = (struct srrp_response *) send_buff;
 
-						if(parse_udp(request->id, response, result)){
+						if(parse_udp(request->id, response, result, speed, dscp)){
 							client_log("Error", "Failed to parse udp response");
 							_exit(0);
 						}
