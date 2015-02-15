@@ -290,11 +290,11 @@ int main(int argc, char**argv){
 					for(i = 0; i < request->length; i++){
 						if(request->params[i].param == SRRP_SPEED){
 							speed = request->params[i].value;
-						}else if(request->params[i].param == SRRP_SPEED){
-							size = request->params[i].value;
 						}else if(request->params[i].param == SRRP_SIZE){
-							duration = request->params[i].value;
+							size = request->params[i].value;
 						}else if(request->params[i].param == SRRP_DUR){
+							duration = request->params[i].value;
+						}else if(request->params[i].param == SRRP_DSCP){
 							dscp = request->params[i].value;
 						}else{
 							client_log("Error", "Invalid ping parameter");
