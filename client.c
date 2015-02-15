@@ -324,13 +324,12 @@ int main(int argc, char**argv){
 
 						//should send resonpse with failed success code
 
-						printf("FAILED\n");
 
 						_exit(1);
 					}else{
 						struct srrp_response * response = (struct srrp_response *) send_buff;
 
-						printf("PARSING\n");
+						printf("results=%s", result);
 
 						if(parse_udp(request->id, response, result, speed, dscp)){
 							client_log("Error", "Failed to parse udp response");
