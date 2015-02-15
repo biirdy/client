@@ -9,6 +9,7 @@
 #define SRRP_PRTO   3       // Protocol
 #define SRRP_SPEED	4		// Speed
 #define SRRP_DUR 	5		// Duration
+#define SRRP_DSCP	6		// DSCP
 
 //SRRP parameter
 struct srrp_param{

@@ -275,7 +275,7 @@ int main(int argc, char**argv){
 				client_log("Info", "Received UDP iperf request");
 
 				if(fork() == 0){
-					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %dM -l %d -t %d -y C";
+					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %dM -l %d -t %d -S %d -y C";
 					char cmd[100];
 
 					//default params
@@ -283,8 +283,25 @@ int main(int argc, char**argv){
 					int speed = 1;
 					int size = 1470;
 					int duration = 10;
+					int dscp = 0;
 
-					sprintf(cmd, cmd_fmt, dst_addr, speed, size, duration);
+					//load in params
+					int i;
+					for(i = 0; i < request->length; i++){
+						if(request->params[i].param == SRRP_SPEED){
+							speed = request->params[i].value;
+						else if(request->params[i].param == SRRP_SPEED){
+							size = request->params[i].value;
+						}else if(request->params[i].param == SRRP_SIZE){
+							duration = request->params[i].value;
+						}else if(request->params[i].param == SRRP_DUR){
+							dscp = request->params[i].value;
+						}else{
+							client_log("Error", "Invalid ping parameter");
+						}
+					}
+
+					sprintf(cmd, cmd_fmt, dst_addr, speed, size, duration, dscp);
 
 					printf("%s\n", cmd);
 
