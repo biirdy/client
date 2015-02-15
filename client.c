@@ -333,6 +333,8 @@ int main(int argc, char**argv){
 							_exit(0);
 						}
 
+						printf("SENDING UDP RESPONSE\n");
+
 						send(clientSocket, send_buff, sizeof(send_buff), 0);
 
 						_exit(0);
