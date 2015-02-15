@@ -275,7 +275,7 @@ int main(int argc, char**argv){
 				client_log("Info", "Received UDP iperf request");
 
 				if(fork() == 0){
-					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %d -l %d -t %d -y C";
+					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %dM -l %d -t %d -y C";
 					char cmd[100];
 
 					//default params
