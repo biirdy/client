@@ -313,7 +313,7 @@ int main(int argc, char**argv){
 					}
 
 					//get otuput	-	single line because of -y C flage
-					char result[100];
+					char result[200];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){
 						printf("%s\n", result);
 					}
