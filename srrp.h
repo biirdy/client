@@ -81,7 +81,7 @@ struct srrp_response{
 * response 	-
 * output 	- the last line outputted by ping. String is destroyed.
 */
-int parse_ping(int id, struct srrp_response * response, char * output, int send_speed, int dscp_flag){
+int parse_ping(int id, struct srrp_response * response, char * output){
 
 	if(response==NULL || output==NULL)
 		return 1;
@@ -129,7 +129,7 @@ int parse_iperf(struct srrp_response * response, char * output){
 *
 *
 */
-int parse_udp(int id, struct srrp_response *response, char * output){
+int parse_udp(int id, struct srrp_response *response, char * output, int send_speed, int dscp_flag){
 
 	if(response==NULL || output==NULL)
 		return 1;
