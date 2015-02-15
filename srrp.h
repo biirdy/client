@@ -46,7 +46,10 @@ struct srrp_request{
 #define SRRP_RES_SIZE	7		// Size
 #define SRRP_RES_JTR	8       // Jitter
 #define SRRP_RES_PKLS 	9      	// Packet loss
-#define SRRP_RES_HOP 	10      // Traceroute hop
+#define SRRP_RES_SPEED	10		// Send speed
+#define SRRP_RES_DSCP	11		// DSCP flags 
+#define SRRP_RES_HOP 	12      // Traceroute hop
+
 
 //SRRP result 
 struct srrp_result{
@@ -78,7 +81,7 @@ struct srrp_response{
 * response 	-
 * output 	- the last line outputted by ping. String is destroyed.
 */
-int parse_ping(int id, struct srrp_response * response, char * output){
+int parse_ping(int id, struct srrp_response * response, char * output, int send_speed, int dscp_flag){
 
 	if(response==NULL || output==NULL)
 		return 1;
@@ -141,7 +144,7 @@ int parse_udp(int id, struct srrp_response *response, char * output){
 
 	//header
 	response->id = id;
-	response->length = 5;
+	response->length = 7;
 	response->success = SRRP_SCES;
 
 	//add results
@@ -165,7 +168,6 @@ int parse_udp(int id, struct srrp_response *response, char * output){
 	jit_result.value = atof(strtok(NULL, ","));
 	response->results[3] = jit_result;
 
-
 	strtok(NULL, ",");		//recvd datagras
 	strtok(NULL, ",");		//sent datagrams
 
@@ -173,6 +175,16 @@ int parse_udp(int id, struct srrp_response *response, char * output){
 	pkls_result.result = SRRP_RES_PKLS;
 	pkls_result.value = atof(strtok(NULL, ","));
 	response->results[4] = pkls_result;
+
+	struct srrp_result dscp;
+	dscp.result = SRRP_RES_DSCP;
+	dscp.value = dscp_flag;
+	response->results[5] = dscp;
+
+	struct srrp_result sspeed;
+	sspeed.result = SRRP_RES_SPEED;
+	sspeed.value = send_speed;
+	response->results[6] = sspeed;
 
 	return 0;
 }

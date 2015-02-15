@@ -297,7 +297,7 @@ int main(int argc, char**argv){
 						}else if(request->params[i].param == SRRP_DSCP){
 							dscp = request->params[i].value;
 						}else{
-							client_log("Error", "Invalid ping parameter");
+							client_log("Error", "Invalid udp parameter");
 						}
 					}
 
