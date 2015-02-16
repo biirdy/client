@@ -324,7 +324,6 @@ int main(int argc, char**argv){
 
 						//should send resonpse with failed success code
 
-
 						_exit(1);
 					}else{
 						struct srrp_response * response = (struct srrp_response *) send_buff;
@@ -336,11 +335,9 @@ int main(int argc, char**argv){
 							_exit(0);
 						}
 
-						printf("SENDING UDP RESPONSE\n");
-
 						send(clientSocket, send_buff, sizeof(send_buff), 0);
 
-						printf("SENT UDP RESPONSE\n");
+						client_log("Info", "Sending udp iperf results");
 
 						_exit(0);
 					}
