@@ -343,6 +343,51 @@ int main(int argc, char**argv){
 					}
 				}
 
+			}else if(request->type == SRRP_DNS){
+				client_log("Info", "Received dns request");
+
+				if(fork() == 0){
+					char * cmd = "nslookup google.co.uk";
+
+					fp = popen(cmd , "r");
+					if(fp == NULL){
+						client_log("Error", "Failed to run command %s", cmd);
+						_exit(1);
+					}
+
+					//get otuput
+					char result[200];
+					while(fgets(result, sizeof(result)-1, fp) != NULL){
+						printf("%s\n", result);
+					}
+
+					int exit_status = WEXITSTATUS(pclose(fp));
+					if(exit_status != 0){
+						client_log("Info", "DNS status failure");
+
+						//create response
+						struct srrp_response * response = (struct srrp_response *) send_buff;
+						response->id == request->id;
+						response->length = 0;
+						response->success = SRRP_FAIL;
+
+						send(clientSocket, send_buff, sizeof(send_buff), 0);
+					}else{
+						client_log("Info", "DNS status sucess");	
+
+						//create response
+						struct srrp_response * response = (struct srrp_response *) send_buff;
+						response->id == request->id;
+						response->length = 0;
+						response->success = SRRP_SCES;
+
+						send(clientSocket, send_buff, sizeof(send_buff), 0);
+					}
+
+					_exit(0);
+
+				}
+
 			}else{
 				//unrecognised data
 				client_log("Error", "Recevied unrecognised data - %d - %d bytes", request->type, bytes);
