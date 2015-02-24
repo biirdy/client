@@ -347,7 +347,7 @@ int main(int argc, char**argv){
 				client_log("Info", "Received dns request");
 
 				if(fork() == 0){
-					char * cmd = "nslookup kjhkjhhgh";
+					char * cmd = "nslookup google.co.uk";
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
