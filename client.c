@@ -361,9 +361,9 @@ int main(int argc, char**argv){
 						printf("%s\n", result);
 					}
 
-					uint8_t exit_status = WEXITSTATUS(pclose(fp));
-					if(exit_status != 0){
-						client_log("Info", "DNS status failure - exit status %u", exit_status);
+					//uint8_t exit_status = );
+					if(WEXITSTATUS(pclose(fp) != 0){
+						client_log("Info", "DNS status failure - exit status");
 
 						//create response
 						struct srrp_response * response = (struct srrp_response *) send_buff;
