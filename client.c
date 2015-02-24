@@ -363,7 +363,7 @@ int main(int argc, char**argv){
 
 					int exit_status = WEXITSTATUS(pclose(fp));
 					if(exit_status != 0){
-						client_log("Info", "DNS status failure");
+						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
 						//create response
 						struct srrp_response * response = (struct srrp_response *) send_buff;
