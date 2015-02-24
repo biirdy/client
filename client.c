@@ -13,6 +13,8 @@
 #include <stdarg.h>
 #include "srrp.h"
 
+#include <libexplain/pclose.h>
+
 FILE* logs;
 
 void client_log(const char * type, const char * fmt, ...){
