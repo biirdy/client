@@ -361,9 +361,9 @@ int main(int argc, char**argv){
 						printf("%s\n", result);
 					}
 
-					//uint8_t exit_status = );
-					if(WEXITSTATUS(pclose(fp)) != 0){
-						client_log("Info", "DNS status failure - exit status");
+					int exit_status = pclose(fp)/256;
+					if(exit_status != 0){
+						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
 						//create response
 						struct srrp_response * response = (struct srrp_response *) send_buff;
@@ -373,7 +373,7 @@ int main(int argc, char**argv){
 
 						send(clientSocket, send_buff, sizeof(send_buff), 0);
 					}else{
-						client_log("Info", "DNS status sucess");	
+						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
 						//create response
 						struct srrp_response * response = (struct srrp_response *) send_buff;
