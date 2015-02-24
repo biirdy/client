@@ -362,7 +362,7 @@ int main(int argc, char**argv){
 					}
 
 					//uint8_t exit_status = );
-					if(WEXITSTATUS(pclose(fp) != 0){
+					if(WEXITSTATUS(pclose(fp)) != 0){
 						client_log("Info", "DNS status failure - exit status");
 
 						//create response
