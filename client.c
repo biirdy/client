@@ -13,7 +13,7 @@
 #include <stdarg.h>
 #include "srrp.h"
 
-#include <libexplain/pclose.h>
+#include <libexplain/*>
 
 FILE* logs;
 
