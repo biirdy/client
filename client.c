@@ -365,8 +365,9 @@ int main(int argc, char**argv){
 						printf("%s\n", result);
 					}
 
-					int exit_status = pclose(fp);
-					printf("%s\n", explain_pclose(fp));
+					int exit_status = 0;pclose(fp);
+					//printf("%s\n", explain_pclose(fp));
+					explain_pclose_or_die(fp);
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
