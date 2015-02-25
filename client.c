@@ -365,12 +365,14 @@ int main(int argc, char**argv){
 					char result[200];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
+					char snd_bf[100];
+
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
 						//create response
-						struct srrp_response * response = (struct srrp_response *) send_buff;
+						struct srrp_response * response = (struct srrp_response *) snd_bf;
 						response->id == request->id;
 						response->length = 0;
 						response->success = SRRP_FAIL;
@@ -378,13 +380,13 @@ int main(int argc, char**argv){
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
 						//create response
-						struct srrp_response * response = (struct srrp_response *) send_buff;
+						struct srrp_response * response = (struct srrp_response *) snd_bf;
 						response->id == request->id;
 						response->length = 0;
 						response->success = SRRP_SCES;	
 					}					
 
-					send(clientSocket, send_buff, 100, 0);
+					send(clientSocket, snd_bf, 100, 0);
 
 					client_log("Info", "Sending dns response");
 
