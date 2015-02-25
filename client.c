@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,8 +15,6 @@
 #include "srrp.h"
 
 #include <libexplain/pclose.h>
-#include <libexplain/large_file_support.h>
-#include <libexplain/gcc_attributes.h>
 
 FILE* logs;
 
@@ -123,6 +122,8 @@ int main(int argc, char**argv){
 				client_log("Info", "Recevived iperf request - %d bytes", bytes);
 
 				if(fork() == 0){
+					//listen for SIGCHLD so pclose resturns the status 
+					signal(SIGCHLD, SIG_DFL);
 
 					char * cmd_fmt = "iperf -c %s -t %d -y C";
 					char cmd[100];
@@ -158,8 +159,8 @@ int main(int argc, char**argv){
 					char result[100];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
-					int exit_status = WEXITSTATUS(pclose(fp));
-					if(exit_status != 255){
+					int exit_status = pclose(fp);
+					if(exit_status != 0){
 						client_log("Error", "iperf failed exit status %d", exit_status);
 
 						//should send resonpse with failed success code
@@ -219,6 +220,8 @@ int main(int argc, char**argv){
 				client_log("Info", "Received ping request - %d bytes", bytes);
 
 				if(fork() == 0){
+					//listen for SIGCHLD so pclose resturns the status 
+					signal(SIGCHLD, SIG_DFL);
 					
 					char * command_fmt = "ping -c %d %s";
 					char command[100];
@@ -245,18 +248,15 @@ int main(int argc, char**argv){
 					fp = popen(command , "r");
 					if(fp == NULL){
 						client_log("Error", "Failed to run command %s", command);
-
 						_exit(1);
 					}
 
 					//get otuput	-	single line because of -y C flage
 					char result[100];
-					while(fgets(result, sizeof(result)-1, fp) != NULL){
-						//printf("%s\n", result);
-					}
+					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
-					int exit_status = WEXITSTATUS(pclose(fp));
-					if(exit_status != 255){
+					int exit_status = pclose(fp);
+					if(exit_status != 0){
 						client_log("Error", "command failed exit status %d", exit_status);
 
 						//should respond
@@ -279,6 +279,9 @@ int main(int argc, char**argv){
 				client_log("Info", "Received UDP iperf request");
 
 				if(fork() == 0){
+					//listen for SIGCHLD so pclose resturns the status 
+					signal(SIGCHLD, SIG_DFL);
+
 					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %dM -l %d -t %d -S %d -y C";
 					char cmd[100];
 
@@ -312,7 +315,6 @@ int main(int argc, char**argv){
 					fp = popen(cmd , "r");
 					if(fp == NULL){
 						client_log("Error", "Failed to run command %s", cmd);
-
 						_exit(1);
 					}
 
@@ -322,8 +324,8 @@ int main(int argc, char**argv){
 						printf("%s\n", result);
 					}
 
-					int exit_status = WEXITSTATUS(pclose(fp));
-					if(exit_status != 255){
+					int exit_status = pclose(fp);
+					if(exit_status != 0){
 						client_log("Error", "udp iperf failed exit status %d", exit_status);
 
 						//should send resonpse with failed success code
@@ -331,8 +333,6 @@ int main(int argc, char**argv){
 						_exit(1);
 					}else{
 						struct srrp_response * response = (struct srrp_response *) send_buff;
-
-						printf("results=%s", result);
 
 						if(parse_udp(request->id, response, result, speed, dscp)){
 							client_log("Error", "Failed to parse udp response");
@@ -351,6 +351,7 @@ int main(int argc, char**argv){
 				client_log("Info", "Received dns request");
 
 				if(fork() == 0){
+					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
 					char * cmd = "nslookup lkjlkjljhgjhg";
@@ -368,8 +369,6 @@ int main(int argc, char**argv){
 					}
 
 					int exit_status = pclose(fp);
-					printf("%s\n", explain_pclose(fp));
-					//explain_pclose_or_die(fp);
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
@@ -378,8 +377,6 @@ int main(int argc, char**argv){
 						response->id == request->id;
 						response->length = 0;
 						response->success = SRRP_FAIL;
-
-						send(clientSocket, send_buff, sizeof(send_buff), 0);
 					}else{
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
@@ -387,10 +384,12 @@ int main(int argc, char**argv){
 						struct srrp_response * response = (struct srrp_response *) send_buff;
 						response->id == request->id;
 						response->length = 0;
-						response->success = SRRP_SCES;
-
-						send(clientSocket, send_buff, sizeof(send_buff), 0);
+						response->success = SRRP_SCES;	
 					}
+
+					send(clientSocket, send_buff, sizeof(send_buff), 0);
+
+					client_log("Info", "Sending dns response");
 
 					_exit(0);
 
