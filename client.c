@@ -106,8 +106,7 @@ int main(int argc, char**argv){
 
 		}else if(ready){
 			bytes = recv(clientSocket,recv_buff, sizeof(recv_buff),0);
-			struct srrp_request * request;
-			request = (struct srrp_request *) recv_buff;
+			struct srrp_request * request = (struct srrp_request *) recv_buff;
 
 			if(request->type == SRRP_HB){
 				//heatbeat request
@@ -391,6 +390,9 @@ int main(int argc, char**argv){
 
 					client_log("Info", "Sending dns response - %d", dns_bytes);
 
+					send(clientSocket, "TESTDATATATAT", 100, 0);
+
+					client_log("Info", "Sending test data");
 
 					_exit(0);
 
