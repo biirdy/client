@@ -382,16 +382,9 @@ int main(int argc, char**argv){
 						response->id == request->id;
 						response->length = 0;
 						response->success = SRRP_SCES;	
-					}
+					}					
 
-					
-					send(clientSocket, "TESTDATATATAT", 100, 0);
-
-					client_log("Info", "Sending test data");
-
-					
-
-					send(clientSocket, send_buff, sizeof(send_buff), 0);
+					send(clientSocket, send_buff, 100, 0);
 
 					client_log("Info", "Sending dns response");
 
