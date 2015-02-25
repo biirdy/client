@@ -384,9 +384,11 @@ int main(int argc, char**argv){
 						response->success = SRRP_SCES;	
 					}
 
-					int dns_bytes = send(clientSocket, send_buff, 1024, 0);
-
 					client_log("Info", "Sending dns response - %d", dns_bytes);
+
+					send(clientSocket, send_buff, 1024, 0);
+
+					
 
 					//send(clientSocket, "TESTDATATATAT", 100, 0);
 
