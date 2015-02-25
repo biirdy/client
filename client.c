@@ -353,7 +353,7 @@ int main(int argc, char**argv){
 				if(fork() == 0){
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "nslookup google.co.uk";
+					char * cmd = "nslookup lkjlkjljhgjhg";
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
