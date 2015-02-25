@@ -354,7 +354,7 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "nslookup lkjlkjljhgjhg";
+					char * cmd = "nslookup google.co.uk";
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
@@ -387,9 +387,10 @@ int main(int argc, char**argv){
 						response->success = SRRP_SCES;	
 					}
 
-					send(clientSocket, send_buff, sizeof(send_buff), 0);
+					int dns_bytes = send(clientSocket, send_buff, sizeof(send_buff), 0);
 
-					client_log("Info", "Sending dns response");
+					client_log("Info", "Sending dns response - %d", dns_bytes);
+
 
 					_exit(0);
 
