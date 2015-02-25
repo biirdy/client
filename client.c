@@ -363,9 +363,7 @@ int main(int argc, char**argv){
 
 					//get otuput
 					char result[200];
-					while(fgets(result, sizeof(result)-1, fp) != NULL){
-						printf("%s\n", result);
-					}
+					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
@@ -386,13 +384,13 @@ int main(int argc, char**argv){
 						response->success = SRRP_SCES;	
 					}
 
-					int dns_bytes = send(clientSocket, send_buff, sizeof(send_buff), 0);
+					int dns_bytes = send(clientSocket, send_buff, 1024, 0);
 
 					client_log("Info", "Sending dns response - %d", dns_bytes);
 
-					send(clientSocket, "TESTDATATATAT", 100, 0);
+					//send(clientSocket, "TESTDATATATAT", 100, 0);
 
-					client_log("Info", "Sending test data");
+					//client_log("Info", "Sending test data");
 
 					_exit(0);
 
