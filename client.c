@@ -57,10 +57,10 @@ int main(int argc, char**argv){
 	socklen_t addr_size;
 
 	//casue zombies to be reaped automatically 
-	/*if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
+	if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
  		perror(0);
   		exit(1);
-	}*/
+	}
 
 	/*---- Create the socket. The three arguments are: ----*/
 	/* 1) Internet domain 2) Stream socket 3) Default protocol (TCP in this case) */
@@ -351,6 +351,8 @@ int main(int argc, char**argv){
 				client_log("Info", "Received dns request");
 
 				if(fork() == 0){
+					signal(SIGCHLD, SIG_DFL);
+
 					char * cmd = "nslookup google.co.uk";
 
 					fp = popen(cmd , "r");
