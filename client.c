@@ -353,7 +353,7 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "nslookup lkjlkjlkj";
+					char * cmd = "nslookup google.co.uk";
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
