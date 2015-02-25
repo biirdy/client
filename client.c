@@ -353,7 +353,7 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "nslookup google.co.uk";
+					char * cmd = "nslookup lkjlkjlkj";
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
@@ -373,16 +373,16 @@ int main(int argc, char**argv){
 
 						//create response
 						struct srrp_response * response = (struct srrp_response *) snd_bf;
-						response->id == request->id;
-						response->length = 5;
+						response->id = request->id;
+						response->length = 0;
 						response->success = SRRP_FAIL;
 					}else{
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
 						//create response
 						struct srrp_response * response = (struct srrp_response *) snd_bf;
-						response->id == request->id;
-						response->length = 5;
+						response->id = request->id;
+						response->length = 0;
 						response->success = SRRP_SCES;	
 					}					
 
