@@ -13,7 +13,9 @@
 #include <stdarg.h>
 #include "srrp.h"
 
-#include <libexplain/*>
+#include <libexplain/pclose.h>
+#include <libexplain/large_file_support.h>
+#include <libexplain/gcc_attributes.h>
 
 FILE* logs;
 
