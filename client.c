@@ -391,11 +391,11 @@ int main(int argc, char**argv){
 
 					
 
-					send(clientSocket, send_buff, 1024, 0);
+					send(clientSocket, send_buff, sizeof(send_buff), 0);
 
 					client_log("Info", "Sending dns response");
 
-					
+					sleep(5);					
 
 					_exit(0);
 
