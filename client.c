@@ -374,7 +374,7 @@ int main(int argc, char**argv){
 						//create response
 						struct srrp_response * response = (struct srrp_response *) snd_bf;
 						response->id == request->id;
-						response->length = 0;
+						response->length = 5;
 						response->success = SRRP_FAIL;
 					}else{
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
@@ -382,7 +382,7 @@ int main(int argc, char**argv){
 						//create response
 						struct srrp_response * response = (struct srrp_response *) snd_bf;
 						response->id == request->id;
-						response->length = 0;
+						response->length = 5;
 						response->success = SRRP_SCES;	
 					}					
 
