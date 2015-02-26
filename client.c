@@ -370,6 +370,8 @@ int main(int argc, char**argv){
 					char result[200];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
+					sleep(1);
+
 					end = clock();
 					exe_time = (double)(end - begin) / CLOCKS_PER_SEC;
 
