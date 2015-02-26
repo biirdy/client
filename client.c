@@ -367,12 +367,8 @@ int main(int argc, char**argv){
 					}
 
 					//get otuput
-					int i = 0;
 					char result[200];
-					while(fgets(result, sizeof(result)-1, fp) != NULL){
-						printf("%d %s\n", i, result);
-						i++;
-					}
+					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
 					gettimeofday(&end, NULL);
 
