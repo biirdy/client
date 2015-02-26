@@ -373,7 +373,7 @@ int main(int argc, char**argv){
 					end = clock();
 					exe_time = (double)(end - begin) / CLOCKS_PER_SEC;
 
-					printf("DNS time %d\n", exe_time);
+					printf("DNS time %f\n", exe_time);
 
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
