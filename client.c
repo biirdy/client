@@ -355,11 +355,10 @@ int main(int argc, char**argv){
 
 					char * cmd = "nslookup google.co.uk";
 
-					clock_t begin, end;
-					double exe_time;
+					struct timeval start, end;
+					long mtime, secs, usecs;
 
-					begin = clock();
-					printf("start clock %d", begin);
+					gettimeofday(&start, NULL);
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
@@ -375,15 +374,13 @@ int main(int argc, char**argv){
 						i++;
 					}
 
-					sleep(1);
+					gettimeofday(&end, NULL);
 
-					end = clock();
+					secs  = end.tv_sec  - start.tv_sec;
+					usecs = end.tv_usec - start.tv_usec;
+					mtime = ((secs) * 1000 + usecs/1000.0) + 0.5;
 
-					printf("end clock %d\n", end);
-
-					exe_time = (double)(end - begin) / CLOCKS_PER_SEC;
-
-					printf("DNS time %f\n", exe_time);
+					printf("DNS time %ld\n", mtime);
 
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
