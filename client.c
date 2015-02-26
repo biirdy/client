@@ -355,6 +355,11 @@ int main(int argc, char**argv){
 
 					char * cmd = "nslookup google.co.uk";
 
+					clock_t begin, end;
+					double exe_time;
+
+					begin = clock();
+
 					fp = popen(cmd , "r");
 					if(fp == NULL){
 						client_log("Error", "Failed to run command %s", cmd);
@@ -365,14 +370,17 @@ int main(int argc, char**argv){
 					char result[200];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
-					char snd_bf[100];
+					end = clock();
+					exe_time = (double)(end - begin) / CLOCKS_PER_SEC;
+
+					printf("DNS time %d\n", exe_time);
 
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
 						//create response
-						struct srrp_response * response = (struct srrp_response *) snd_bf;
+						struct srrp_response * response = (struct srrp_response *) send_buff;
 						response->id = request->id;
 						response->length = 0;
 						response->success = SRRP_FAIL;
@@ -380,17 +388,15 @@ int main(int argc, char**argv){
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
 						//create response
-						struct srrp_response * response = (struct srrp_response *) snd_bf;
+						struct srrp_response * response = (struct srrp_response *) send_buff;
 						response->id = request->id;
 						response->length = 0;
 						response->success = SRRP_SCES;	
 					}					
 
-					send(clientSocket, snd_bf, 100, 0);
+					send(clientSocket, send_buff, sizeof(send_buff), 0);
 
-					client_log("Info", "Sending dns response");
-
-					sleep(5);					
+					client_log("Info", "Sending dns response");				
 
 					_exit(0);
 
