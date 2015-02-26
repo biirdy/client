@@ -393,8 +393,13 @@ int main(int argc, char**argv){
 						//create response
 						struct srrp_response * response = (struct srrp_response *) send_buff;
 						response->id = request->id;
-						response->length = 0;
+						response->length = 1;
 						response->success = SRRP_SCES;	
+
+						struct srrp_result dur;
+						dur.result = SRRP_RES_DUR;
+						dur.value = mtime;
+						response->results[0] = dur;
 					}					
 
 					send(clientSocket, send_buff, sizeof(send_buff), 0);
