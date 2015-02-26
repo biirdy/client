@@ -353,7 +353,7 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "time nslookup google.co.uk";
+					char * cmd = "nslookup google.co.uk";
 
 					clock_t begin, end;
 					double exe_time;
