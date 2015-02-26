@@ -353,12 +353,13 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "nslookup google.co.uk";
+					char * cmd = "time nslookup google.co.uk";
 
 					clock_t begin, end;
 					double exe_time;
 
 					begin = clock();
+					printf("start clock %d", begin);
 
 					fp = popen(cmd , "r");
 					if(fp == NULL){
@@ -367,12 +368,19 @@ int main(int argc, char**argv){
 					}
 
 					//get otuput
+					int i = 0;
 					char result[200];
-					while(fgets(result, sizeof(result)-1, fp) != NULL){}
+					while(fgets(result, sizeof(result)-1, fp) != NULL){
+						printf("%d %s\n", i, result);
+						i++;
+					}
 
 					sleep(1);
 
 					end = clock();
+
+					printf("end clock %d\n", end);
+
 					exe_time = (double)(end - begin) / CLOCKS_PER_SEC;
 
 					printf("DNS time %f\n", exe_time);
