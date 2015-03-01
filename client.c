@@ -18,6 +18,22 @@
 
 FILE* logs;
 
+/*
+* Config struct to be loaded in 
+*/
+typedef struct{
+    //server
+    const char* server_addr;
+    int server_port;
+
+    //iperf
+    int tcp_iperf_port;
+    int udp_iperf_port;
+
+    const char* nslookup_addr;
+} configuration;
+configuration config;
+
 void client_log(const char * type, const char * fmt, ...){
 	//format message
 	va_list args; 
