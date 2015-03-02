@@ -16,8 +16,8 @@
 
 #include <libexplain/pclose.h>	//not used anymore
 
-#include "ini/ini.h"
-#include "ini/ini.c"
+#include "ini.h"
+#include "ini.c"
 
 FILE* logs;
 
