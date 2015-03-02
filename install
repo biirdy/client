@@ -1,0 +1,14 @@
+#executables
+cp bin/sensor /usr/bin/sensor
+
+#config
+mkdir -p /etc/sensor
+cp config/config.ini /etc/sensor/config.ini
+
+#run on start up
+cp startup/rc.local /etc/rc.local
+
+#mkae log dir
+mkdir -p /var/log/sensor
+
+
