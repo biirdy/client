@@ -14,7 +14,10 @@
 #include <stdarg.h>
 #include "srrp.h"
 
-#include <libexplain/pclose.h>
+#include <libexplain/pclose.h>	//not used anymore
+
+#include "ini/ini.h"
+#include "ini/ini.c"
 
 FILE* logs;
 
@@ -33,6 +36,26 @@ typedef struct{
     const char* nslookup_addr;
 } configuration;
 configuration config;
+
+static int handler(void* user, const char* section, const char* name, const char* value){
+    configuration* pconfig = (configuration*)user;
+
+    #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+    if (MATCH("server", "server_addr")) {
+        pconfig->server_addr = strdup(value);
+    } else if (MATCH("server", "server_port")) {
+        pconfig->server_port = atoi(value);
+    } else if (MATCH("iperf", "tcp_iperf_port")) {
+        pconfig->tcp_iperf_port = atoi(value);
+    } else if (MATCH("iperf", "udp_iperf_port")) {
+        pconfig->udp_iperf_port = atoi(value);
+    } else if (MATCH("nslookup", "nslookup_addr")) {
+        pconfig->nslookup_addr = strdup(value);
+    } else {
+        return 0;  /* unknown section/name, error */
+    }
+    return 1;
+}
 
 void client_log(const char * type, const char * fmt, ...){
 	//format message
@@ -71,6 +94,12 @@ int main(int argc, char**argv){
 	struct sockaddr_in serverAddr;
 	socklen_t addr_size;
 
+	//parse configurations from file
+    if (ini_parse("/etc/sensor/config.ini", handler, &config) < 0) {
+        client_log("Error", "Can't load 'config.ini'\n");
+        return 1;
+    }
+
 	//casue zombies to be reaped automatically 
 	if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
  		perror(0);
@@ -85,9 +114,9 @@ int main(int argc, char**argv){
 	/* Address family = Internet */
 	serverAddr.sin_family = AF_INET;
 	/* Set port number, using htons function to use proper byte order */
-	serverAddr.sin_port = htons(7891);
+	serverAddr.sin_port = htons(config.server_port);
 	/* Set IP address to localhost */
-	serverAddr.sin_addr.s_addr = inet_addr(argv[1]);
+	serverAddr.sin_addr.s_addr = inet_addr(config.server_addr);
 	/* Set all bits of the padding field to 0 */
 	memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
 
@@ -140,11 +169,10 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd_fmt = "iperf -c %s -t %d -y C";
+					char * cmd_fmt = "iperf -c %s -p %d -t %d -y C";
 					char cmd[100];
 
 					//default params
-					char * dst_addr = "jbird.me";
 					int dur = 10;
 
 					//get parameters
@@ -158,7 +186,7 @@ int main(int argc, char**argv){
 					}
 
 					//build command
-					sprintf(cmd, cmd_fmt, dst_addr, dur);
+					sprintf(cmd, cmd_fmt, config.server_addr, config.tcp_iperf_port, dur);
 
 					printf("%s\n", cmd);
 
@@ -242,7 +270,6 @@ int main(int argc, char**argv){
 					char command[100];
 
 					//default params
-					char * dst_addr = "jbird.me";
 					int itterations = 5;
 
 					//load in params
@@ -256,7 +283,7 @@ int main(int argc, char**argv){
 					}
 
 					//build command
-					sprintf(command, command_fmt, itterations, dst_addr);
+					sprintf(command, command_fmt, itterations, config.server_addr);
 
 					printf("%s\n", command);
 
@@ -297,11 +324,10 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd_fmt = "iperf -c %s -u -p 5002 -b %dM -l %d -t %d -S %d -y C";
+					char * cmd_fmt = "iperf -c %s -u -p %d -b %dM -l %d -t %d -S %d -y C";
 					char cmd[100];
 
 					//default params
-					char * dst_addr = "jbird.me";
 					int speed = 1;
 					int size = 1470;
 					int duration = 10;
@@ -323,7 +349,7 @@ int main(int argc, char**argv){
 						}
 					}
 
-					sprintf(cmd, cmd_fmt, dst_addr, speed, size, duration, dscp);
+					sprintf(cmd, cmd_fmt, config.server_addr, config.udp_iperf_port, speed, size, duration, dscp);
 
 					printf("%s\n", cmd);
 
@@ -369,7 +395,10 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd = "nslookup google.co.uk";
+					char * cmd_fmt = "nslookup %s";
+					char cmd[100];
+
+					sprintf(cmd, cmd_fmt, config.nslookup_addr);
 
 					struct timeval start, end;
 					long mtime, secs, usecs;
