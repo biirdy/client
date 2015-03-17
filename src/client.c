@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include "srrp.h"
 
-#include <libexplain/pclose.h>	//not used anymore
+//#include <libexplain/pclose.h>	//not used anymore
 
 #include "ini.h"
 #include "ini.c"
@@ -85,7 +85,7 @@ void client_log(const char * type, const char * fmt, ...){
 int main(int argc, char**argv){
 
 	//log files
-	logs = fopen("/var/log/tnp/client.log", "a+");
+	logs = fopen("/var/log/sensor/sensor.log", "a+");
 
 	int clientSocket;
 	char buffer[1024];

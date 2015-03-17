@@ -10,5 +10,5 @@ cp startup/rc.local /etc/rc.local
 
 #mkae log dir
 mkdir -p /var/log/sensor
-
+touch /var/log/sensor/sensor.log
 
