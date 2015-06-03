@@ -463,6 +463,7 @@ int main(int argc, char**argv){
 			//timeout
 			//dont care about timeout --- keep running
 			client_log("Error", "Timeout");
+			break;
 		}
 	}
 
