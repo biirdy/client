@@ -1,1 +1,1 @@
-/usr/bin/sensor_loop
+/usr/bin/sensor_loop &
