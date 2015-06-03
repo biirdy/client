@@ -7,6 +7,7 @@ cp config/config.ini /etc/sensor/config.ini
 
 #run on start up
 cp startup/rc.local /etc/rc.local
+cp startup/sensor_loop /usr/bin/sensor_loop
 
 #mkae log dir
 mkdir -p /var/log/sensor
