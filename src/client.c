@@ -324,7 +324,7 @@ int main(int argc, char**argv){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd_fmt = "iperf -c %s -u -p %d -b %dM -l %d -t %d -S %d -y C";
+					char * cmd_fmt = "iperf -c %s -u -p %d -b %dK -l %d -t %d -S %d -y C";
 					char cmd[100];
 
 					//default params
