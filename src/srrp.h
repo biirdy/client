@@ -96,22 +96,30 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 	//add results
 	struct srrp_result min_result;
 	min_result.result = SRRP_RES_RTTMIN;
-	min_result.value = atoi(strtok(NULL, "/"));
+	//min_result.value = atoi(strtok(NULL, "/"));
+	float min = atof(strtok(NULL, "/"));
+	memcpy(&min_result.value, &min, 4);
 	response->results[0] = min_result;
 
 	struct srrp_result avg_result;
 	avg_result.result = SRRP_RES_RTTAVG;
-	avg_result.value = atoi(strtok(NULL, "/"));
+	//avg_result.value = atoi(strtok(NULL, "/"));
+	float avg = atof(strtok(NULL, "/"));
+	memcpy(&avg_result.value, &min, 4);
 	response->results[1] = avg_result;
 
 	struct srrp_result max_result;
 	max_result.result = SRRP_RES_RTTMAX;
-	max_result.value = atoi(strtok(NULL, "/"));
+	//max_result.value = atoi(strtok(NULL, "/"));
+	float max = atof(strtok(NULL, "/"));
+	memcpy(&max_result.value, &max, 4);
 	response->results[2] = max_result;
 
 	struct srrp_result dev_result;
 	dev_result.result = SRRP_RES_RTTDEV;
-	dev_result.value = atoi(strtok(NULL, "/"));
+	//dev_result.value = atoi(strtok(NULL, "/"));
+	float dev = atof(strtok(NULL, "/"));
+	memcpy(&dev_result.value, &dev, 4);
 	response->results[3] = dev_result;
 
 	return 0;
@@ -187,4 +195,8 @@ int parse_udp(int id, struct srrp_response *response, char * output, int send_sp
 	response->results[6] = sspeed;
 
 	return 0;
+}
+
+void set_float(float num, uint32_t dst){
+
 }
