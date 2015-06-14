@@ -11,6 +11,8 @@
 #define SRRP_DUR 	5		// Duration
 #define SRRP_DSCP	6		// DSCP
 
+#define PARAM_SIZE 4
+
 //SRRP parameter
 struct srrp_param{
 	uint16_t	param;
@@ -25,6 +27,8 @@ struct srrp_param{
 #define SRRP_DNS	5       // DNS status 
 #define SRRP_TRT	6       // Traceroute
 
+#define REQUEST_HEADER_LENGTH 12
+
 //SRRP request
 struct srrp_request{
 	uint32_t			id;
@@ -33,8 +37,6 @@ struct srrp_request{
 	uint32_t			dst_ip;
 	struct srrp_param	params[ ];
 } __attribute__((__packed__));
-
-
 
 //SRRP result types 
 #define SRRP_RES_RTTAVG 1       // RTT avgerage
@@ -50,6 +52,7 @@ struct srrp_request{
 #define SRRP_RES_DSCP	11		// DSCP flags 
 #define SRRP_RES_HOP 	12      // Traceroute hop
 
+#define RESULT_SIZE 8
 
 //SRRP result 
 struct srrp_result{
@@ -62,6 +65,8 @@ struct srrp_result{
 #define SRRP_PSCES  2       // Partly sucessful
 #define SRRP_FAIL   3       // Failed
 
+#define RESPONSE_HEADER_LENGTH 8
+
 //SRRP response
 struct srrp_response{
 	uint32_t			id;
@@ -69,6 +74,67 @@ struct srrp_response{
 	uint16_t			success;
 	struct srrp_result	results[ ];
 } __attribute__((__packed__));
+
+
+
+/*
+*
+*/
+int response_init(struct srrp_response * response, int id, int success){
+	response->length = 0;
+	response->id = id;
+	response->success = SRRP_SCES;
+
+	return 1;
+}
+
+/*
+*
+*/
+int add_result(struct srrp_response * response, int type, float value){
+	
+	struct srrp_result result;
+	result.result = type;
+	memcpy(&result.value, &value, 4); 
+	response->results[response->length] = result;
+	response->length++;
+
+	return(response->length);
+}
+
+/*
+* Return the size of the response in bytes
+*/
+int response_size(struct srrp_response * response){
+	return (response->length * RESULT_SIZE) + RESPONSE_HEADER_LENGTH;
+}
+
+int request_init(struct srrp_request * request, int id, int type){
+
+	request->id = id;
+	request->type = type;
+	request->length = 0;
+
+	return 1;
+}
+
+int add_param(struct srrp_request * request, int type, int value){
+
+	struct srrp_param param;
+	param.param = type;
+	param.value = value;
+	request->params[request->length] = param;
+	request->length++;
+
+	return(request->length);
+}
+
+/*
+* Return the size of the request in bytes
+*/
+int request_size(struct srrp_request * request){
+	return(request->length * PARAM_SIZE) + REQUEST_HEADER_LENGTH;
+} 
 
 /*
 *
@@ -89,11 +155,13 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 	strtok(output, "=");
 
 	//header
-	response->id = id;
+	/*response->id = id;
 	response->length = 4;
-	response->success = SRRP_SCES;
+	response->success = SRRP_SCES;*/
 
-	//add results
+	response_init(response, id, SRRP_SCES);
+
+	/*//add results
 	struct srrp_result min_result;
 	min_result.result = SRRP_RES_RTTMIN;
 	//min_result.value = atoi(strtok(NULL, "/"));
@@ -120,16 +188,51 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 	//dev_result.value = atoi(strtok(NULL, "/"));
 	float dev = atof(strtok(NULL, "/"));
 	memcpy(&dev_result.value, &dev, 4);
-	response->results[3] = dev_result;
+	response->results[3] = dev_result;*/
+
+	add_result(response, SRRP_RES_RTTMIN, atof(strtok(NULL, "/")));
+	add_result(response, SRRP_RES_RTTAVG, atof(strtok(NULL, "/")));
+	add_result(response, SRRP_RES_RTTMAX, atof(strtok(NULL, "/")));
+	add_result(response, SRRP_RES_RTTDEV, atof(strtok(NULL, "/")));
 
 	return 0;
 }
+
+
 
 /*
 * response 	-
 * output 	- a comma seperated string produced by iperf using the '-y C' flag
 */
-int parse_iperf(struct srrp_response * response, char * output){
+int parse_iperf(int id, struct srrp_response * response, char * output){
+	
+	if(response==NULL || output==NULL)
+		return 1;
+
+	response_init(response, id, SRRP_SCES);
+
+	strtok(output, ",");	//time
+	strtok(NULL, ",");		//src addr
+	strtok(NULL, ",");		//src port
+	strtok(NULL, ",");		//dst addr
+	strtok(NULL, ",");		//dst port
+	strtok(NULL, "-");
+
+	add_result(response, SRRP_RES_DUR, atof(strtok(NULL, ",")));	//duration
+	add_result(response, SRRP_RES_SIZE, atof(strtok(NULL, ",")));	//date
+	add_result(response, SRRP_RES_BW, atof(strtok(NULL, ",")));		//bw				
+
+
+	return 0;
+}
+
+/*
+*
+*/
+int parse_failure(struct srrp_response * response, int id){
+
+	response_init(response, id, SRRP_FAIL);
+
 	return 1;
 }
 
@@ -195,8 +298,4 @@ int parse_udp(int id, struct srrp_response *response, char * output, int send_sp
 	response->results[6] = sspeed;
 
 	return 0;
-}
-
-void set_float(float num, uint32_t dst){
-
 }

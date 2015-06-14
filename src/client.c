@@ -155,13 +155,11 @@ int main(int argc, char**argv){
 
 			if(request->type == SRRP_HB){
 				//heatbeat request
-				printf("Received hb request\n");
+				printf("Received hb request - %d bytes\n", bytes);
 				//build response
-				struct srrp_response * response;
-				response = (struct srrp_response *) send_buff;
-				response->id = 0;
-				response->length = 0;
-				send(clientSocket, send_buff, sizeof(send_buff), 0);
+				response_init((struct srrp_response *) send_buff, 0, SRRP_SCES);
+
+				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 			}else if(request->type == SRRP_BW){				
 				client_log("Info", "Recevived iperf request - %d bytes", bytes);
 
@@ -210,50 +208,16 @@ int main(int argc, char**argv){
 
 						_exit(1);
 					}else{
-						
-						//split up results
-						char * tm, * src, * src_prt, * dst, * dst_port;
-						int bps, data;
-						double dur;
-						tm = strtok(result, ",");
-						src = strtok(NULL, ",");
-						src_prt = strtok(NULL, ",");
-						dst = strtok(NULL, ",");
-						dst_port = strtok(NULL, ",");
-						strtok(NULL, "-");
-						dur = atof(strtok(NULL, ","));
-						data = atoi(strtok(NULL, ","));
-						bps = atoi(strtok(NULL, ","));
 
 						//build response
-						struct srrp_response * response;
-						response = (struct srrp_response *) send_buff;
-						response->id = request->id;
-						response->length = 3;
-						response->success = SRRP_SCES;
-
-						//add results
-						//bandwidth
-						struct srrp_result bw;
-						bw.result = SRRP_RES_BW;
-						bw.value = bps;
-						response->results[0] = bw;
-
-						//duration
-						struct srrp_result duration;
-						duration.result = SRRP_RES_DUR;
-						duration.value = dur;
-						response->results[1] = duration;
-	
-						//bytes
-						struct srrp_result size;
-						size.result = SRRP_RES_SIZE;
-						size.value = data;
-						response->results[2] = size;
+						if(parse_iperf(request->id, (struct srrp_response *) send_buff, result)){
+							client_log("Error", "Failed to parse iperf response");
+							_exit(0);
+						}
 
 						client_log("Info", "Sending iperf results");
 
-						send(clientSocket, send_buff, sizeof(send_buff), 0);
+						send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 					}
 
 					_exit(0);
@@ -304,14 +268,14 @@ int main(int argc, char**argv){
 						//should respond
 
 					}else{
-						struct srrp_response * response = (struct srrp_response *) send_buff;
+						//struct srrp_response * response = (struct srrp_response *) send_buff;
 
-						if(parse_ping(request->id, response, result)){
+						if(parse_ping(request->id, (struct srrp_response *) send_buff, result)){
 							client_log("Error", "Failed to parse ping response");
 							_exit(0);
 						}
 
-						send(clientSocket, send_buff, sizeof(send_buff), 0);
+						send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 
 						_exit(0);
 					}
@@ -370,6 +334,7 @@ int main(int argc, char**argv){
 						client_log("Error", "udp iperf failed exit status %d", exit_status);
 
 						//should send resonpse with failed success code
+						//parse_failure()
 
 						_exit(1);
 					}else{
