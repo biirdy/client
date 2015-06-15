@@ -268,7 +268,6 @@ int main(int argc, char**argv){
 						//should respond
 
 					}else{
-						//struct srrp_response * response = (struct srrp_response *) send_buff;
 
 						if(parse_ping(request->id, (struct srrp_response *) send_buff, result)){
 							client_log("Error", "Failed to parse ping response");
@@ -282,7 +281,7 @@ int main(int argc, char**argv){
 
 				}	
 			}else if(request->type == SRRP_UDP){
-				client_log("Info", "Received UDP iperf request");
+				client_log("Info", "Received UDP iperf request - %d bytes", bytes);
 
 				if(fork() == 0){
 					//listen for SIGCHLD so pclose resturns the status 
@@ -338,14 +337,13 @@ int main(int argc, char**argv){
 
 						_exit(1);
 					}else{
-						struct srrp_response * response = (struct srrp_response *) send_buff;
 
-						if(parse_udp(request->id, response, result, speed, dscp)){
+						if(parse_udp(request->id, (struct srrp_response *) send_buff, result, speed, dscp)){
 							client_log("Error", "Failed to parse udp response");
 							_exit(0);
 						}
 
-						send(clientSocket, send_buff, sizeof(send_buff), 0);
+						send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 
 						client_log("Info", "Sending udp iperf results");
 

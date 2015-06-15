@@ -155,41 +155,9 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 	strtok(output, "=");
 
 	//header
-	/*response->id = id;
-	response->length = 4;
-	response->success = SRRP_SCES;*/
-
 	response_init(response, id, SRRP_SCES);
 
-	/*//add results
-	struct srrp_result min_result;
-	min_result.result = SRRP_RES_RTTMIN;
-	//min_result.value = atoi(strtok(NULL, "/"));
-	float min = atof(strtok(NULL, "/"));
-	memcpy(&min_result.value, &min, 4);
-	response->results[0] = min_result;
-
-	struct srrp_result avg_result;
-	avg_result.result = SRRP_RES_RTTAVG;
-	//avg_result.value = atoi(strtok(NULL, "/"));
-	float avg = atof(strtok(NULL, "/"));
-	memcpy(&avg_result.value, &min, 4);
-	response->results[1] = avg_result;
-
-	struct srrp_result max_result;
-	max_result.result = SRRP_RES_RTTMAX;
-	//max_result.value = atoi(strtok(NULL, "/"));
-	float max = atof(strtok(NULL, "/"));
-	memcpy(&max_result.value, &max, 4);
-	response->results[2] = max_result;
-
-	struct srrp_result dev_result;
-	dev_result.result = SRRP_RES_RTTDEV;
-	//dev_result.value = atoi(strtok(NULL, "/"));
-	float dev = atof(strtok(NULL, "/"));
-	memcpy(&dev_result.value, &dev, 4);
-	response->results[3] = dev_result;*/
-
+	//resutls 
 	add_result(response, SRRP_RES_RTTMIN, atof(strtok(NULL, "/")));
 	add_result(response, SRRP_RES_RTTAVG, atof(strtok(NULL, "/")));
 	add_result(response, SRRP_RES_RTTMAX, atof(strtok(NULL, "/")));
@@ -209,6 +177,7 @@ int parse_iperf(int id, struct srrp_response * response, char * output){
 	if(response==NULL || output==NULL)
 		return 1;
 
+	//header
 	response_init(response, id, SRRP_SCES);
 
 	strtok(output, ",");	//time
@@ -218,6 +187,7 @@ int parse_iperf(int id, struct srrp_response * response, char * output){
 	strtok(NULL, ",");		//dst port
 	strtok(NULL, "-");
 
+	//results
 	add_result(response, SRRP_RES_DUR, atof(strtok(NULL, ",")));	//duration
 	add_result(response, SRRP_RES_SIZE, atof(strtok(NULL, ",")));	//date
 	add_result(response, SRRP_RES_BW, atof(strtok(NULL, ",")));		//bw				
@@ -240,7 +210,7 @@ int parse_failure(struct srrp_response * response, int id){
 *
 *
 */
-int parse_udp(int id, struct srrp_response *response, char * output, int send_speed, int dscp_flag){
+int parse_udp(int id, struct srrp_response * response, char * output, int send_speed, int dscp_flag){
 
 	if(response==NULL || output==NULL)
 		return 1;
@@ -254,48 +224,20 @@ int parse_udp(int id, struct srrp_response *response, char * output, int send_sp
 	strtok(NULL, "-");		//time 
 
 	//header
-	response->id = id;
-	response->length = 7;
-	response->success = SRRP_SCES;
+	response_init(response, id, SRRP_SCES);
 
 	//add results
-	struct srrp_result dur_result;
-	dur_result.result = SRRP_RES_DUR;
-	dur_result.value = atof(strtok(NULL, ","));
-	response->results[0] = dur_result;
-
-	struct srrp_result size_result;
-	size_result.result = SRRP_RES_SIZE;
-	size_result.value = atof(strtok(NULL, ","));
-	response->results[1] = size_result;	
-
-	struct srrp_result bw_result;
-	bw_result.result = SRRP_RES_BW;
-	bw_result.value = atof(strtok(NULL, ","));
-	response->results[2] = bw_result;
-
-	struct srrp_result jit_result;
-	jit_result.result = SRRP_RES_JTR;
-	jit_result.value = atof(strtok(NULL, ","));
-	response->results[3] = jit_result;
+	add_result(response, SRRP_RES_DUR, atof(strtok(NULL, ",")));
+	add_result(response, SRRP_RES_SIZE, atof(strtok(NULL, ",")));
+	add_result(response, SRRP_RES_BW, atof(strtok(NULL, ",")));
+	add_result(response, SRRP_RES_JTR, atof(strtok(NULL, ",")));
 
 	strtok(NULL, ",");		//recvd datagras
 	strtok(NULL, ",");		//sent datagrams
 
-	struct srrp_result pkls_result;
-	pkls_result.result = SRRP_RES_PKLS;
-	pkls_result.value = atof(strtok(NULL, ","));
-	response->results[4] = pkls_result;
-
-	struct srrp_result dscp;
-	dscp.result = SRRP_RES_DSCP;
-	dscp.value = dscp_flag;
-	response->results[5] = dscp;
-
-	struct srrp_result sspeed;
-	sspeed.result = SRRP_RES_SPEED;
-	sspeed.value = send_speed;
-	response->results[6] = sspeed;
+	add_result(response, SRRP_RES_PKLS, atof(strtok(NULL, ",")));
+	add_result(response, SRRP_RES_DSCP, (float) dscp_flag);
+	add_result(response, SRRP_RES_SPEED, (float) send_speed);
 
 	return 0;
 }
