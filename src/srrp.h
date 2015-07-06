@@ -199,7 +199,7 @@ int parse_iperf(int id, struct srrp_response * response, char * output){
 /*
 *
 */
-int parse_failure(struct srrp_response * response, int id){
+int parse_failure(int id, struct srrp_response * response){
 
 	response_init(response, id, SRRP_FAIL);
 
@@ -238,6 +238,18 @@ int parse_udp(int id, struct srrp_response * response, char * output, int send_s
 	add_result(response, SRRP_RES_PKLS, atof(strtok(NULL, ",")));
 	add_result(response, SRRP_RES_DSCP, (float) dscp_flag);
 	add_result(response, SRRP_RES_SPEED, (float) send_speed);
+
+	return 0;
+}
+
+int parse_dns(int id, struct srrp_response * response, float result){
+
+	if(response==NULL || !result)
+		return 1;
+
+	response_init(response, id, SRRP_SCES);
+
+	add_result(response, SRRP_RES_DUR, result);
 
 	return 0;
 }

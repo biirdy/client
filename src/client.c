@@ -364,7 +364,7 @@ int main(int argc, char**argv){
 					sprintf(cmd, cmd_fmt, config.nslookup_addr);
 
 					struct timeval start, end;
-					long mtime, secs, usecs;
+					float mtime, secs, usecs;
 
 					gettimeofday(&start, NULL);
 
@@ -378,39 +378,25 @@ int main(int argc, char**argv){
 					char result[200];
 					while(fgets(result, sizeof(result)-1, fp) != NULL){}
 
+					//work out resolution time
 					gettimeofday(&end, NULL);
-
 					secs  = end.tv_sec  - start.tv_sec;
 					usecs = end.tv_usec - start.tv_usec;
 					mtime = ((secs) * 1000 + usecs/1000.0) + 0.5;
-
-					printf("DNS time %ld\n", mtime);
 
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
-						//create response
-						struct srrp_response * response = (struct srrp_response *) send_buff;
-						response->id = request->id;
-						response->length = 0;
-						response->success = SRRP_FAIL;
+						parse_failure(request->id, (struct srrp_response *) send_buff);
+
 					}else{
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
-						//create response
-						struct srrp_response * response = (struct srrp_response *) send_buff;
-						response->id = request->id;
-						response->length = 1;
-						response->success = SRRP_SCES;	
-
-						struct srrp_result dur;
-						dur.result = SRRP_RES_DUR;
-						dur.value = mtime;
-						response->results[0] = dur;
+						parse_dns(request->id, (struct srrp_response *) send_buff, mtime);
 					}					
 
-					send(clientSocket, send_buff, sizeof(send_buff), 0);
+					send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 
 					client_log("Info", "Sending dns response");				
 
