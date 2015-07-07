@@ -27,11 +27,10 @@ struct srrp_param{
 #define SRRP_DNS	5       // DNS status 
 #define SRRP_TRT	6       // Traceroute
 
-#define REQUEST_HEADER_LENGTH 12
+#define REQUEST_HEADER_LENGTH 8
 
 //SRRP request
 struct srrp_request{
-	uint32_t			id;
 	uint16_t			type;
 	uint16_t			length;
 	uint32_t			dst_ip;
@@ -69,7 +68,7 @@ struct srrp_result{
 
 //SRRP response
 struct srrp_response{
-	uint32_t			id;
+	uint32_t			type;
 	uint16_t			length;
 	uint16_t			success;
 	struct srrp_result	results[ ];
@@ -80,9 +79,9 @@ struct srrp_response{
 /*
 *
 */
-int response_init(struct srrp_response * response, int id, int success){
+int response_init(struct srrp_response * response, int type, int success){
 	response->length = 0;
-	response->id = id;
+	response->type = type;
 	response->success = SRRP_SCES;
 
 	return 1;
@@ -91,12 +90,12 @@ int response_init(struct srrp_response * response, int id, int success){
 /*
 *
 */
-int add_result(struct srrp_response * response, int type, float value){
+int add_result(struct srrp_response * response, int result, float value){
 	
-	struct srrp_result result;
-	result.result = type;
-	memcpy(&result.value, &value, 4); 
-	response->results[response->length] = result;
+	struct srrp_result res;
+	res.result = result;
+	memcpy(&res.value, &value, 4); 
+	response->results[response->length] = res;
 	response->length++;
 
 	return(response->length);
@@ -109,11 +108,11 @@ int response_size(struct srrp_response * response){
 	return (response->length * RESULT_SIZE) + RESPONSE_HEADER_LENGTH;
 }
 
-int request_init(struct srrp_request * request, int id, int type){
+int request_init(struct srrp_request * request, int type){
 
-	request->id = id;
 	request->type = type;
 	request->length = 0;
+	request->dst_ip = 255;
 
 	return 1;
 }
@@ -147,7 +146,7 @@ int request_size(struct srrp_request * request){
 * response 	-
 * output 	- the last line outputted by ping. String is destroyed.
 */
-int parse_ping(int id, struct srrp_response * response, char * output){
+int parse_ping(int type, struct srrp_response * response, char * output){
 
 	if(response==NULL || output==NULL)
 		return 1;
@@ -155,7 +154,7 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 	strtok(output, "=");
 
 	//header
-	response_init(response, id, SRRP_SCES);
+	response_init(response, type, SRRP_SCES);
 
 	//resutls 
 	add_result(response, SRRP_RES_RTTMIN, atof(strtok(NULL, "/")));
@@ -172,13 +171,13 @@ int parse_ping(int id, struct srrp_response * response, char * output){
 * response 	-
 * output 	- a comma seperated string produced by iperf using the '-y C' flag
 */
-int parse_iperf(int id, struct srrp_response * response, char * output){
+int parse_iperf(int type, struct srrp_response * response, char * output){
 	
 	if(response==NULL || output==NULL)
 		return 1;
 
 	//header
-	response_init(response, id, SRRP_SCES);
+	response_init(response, type, SRRP_SCES);
 
 	strtok(output, ",");	//time
 	strtok(NULL, ",");		//src addr
@@ -199,9 +198,9 @@ int parse_iperf(int id, struct srrp_response * response, char * output){
 /*
 *
 */
-int parse_failure(int id, struct srrp_response * response){
+int parse_failure(int type, struct srrp_response * response){
 
-	response_init(response, id, SRRP_FAIL);
+	response_init(response, type, SRRP_FAIL);
 
 	return 1;
 }
@@ -210,7 +209,7 @@ int parse_failure(int id, struct srrp_response * response){
 *
 *
 */
-int parse_udp(int id, struct srrp_response * response, char * output, int send_speed, int dscp_flag){
+int parse_udp(int type, struct srrp_response * response, char * output, int send_speed, int dscp_flag){
 
 	if(response==NULL || output==NULL)
 		return 1;
@@ -224,7 +223,7 @@ int parse_udp(int id, struct srrp_response * response, char * output, int send_s
 	strtok(NULL, "-");		//time 
 
 	//header
-	response_init(response, id, SRRP_SCES);
+	response_init(response, type, SRRP_SCES);
 
 	//add results
 	add_result(response, SRRP_RES_DUR, atof(strtok(NULL, ",")));
@@ -242,12 +241,12 @@ int parse_udp(int id, struct srrp_response * response, char * output, int send_s
 	return 0;
 }
 
-int parse_dns(int id, struct srrp_response * response, float result){
+int parse_dns(int type, struct srrp_response * response, float result){
 
 	if(response==NULL || !result)
 		return 1;
 
-	response_init(response, id, SRRP_SCES);
+	response_init(response, type, SRRP_SCES);
 
 	add_result(response, SRRP_RES_DUR, result);
 
