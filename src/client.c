@@ -1,15 +1,20 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <netdb.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <net/if_dl.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <string.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <time.h>
-#include <sys/time.h>
 #include <signal.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 #include <stdarg.h>
 #include "srrp.h"
@@ -34,6 +39,9 @@ typedef struct{
     int udp_iperf_port;
 
     const char* nslookup_addr;
+
+    //MAC address - unique ID
+    const char* ether;
 } configuration;
 configuration config;
 
@@ -51,7 +59,9 @@ static int handler(void* user, const char* section, const char* name, const char
         pconfig->udp_iperf_port = atoi(value);
     } else if (MATCH("nslookup", "nslookup_addr")) {
         pconfig->nslookup_addr = strdup(value);
-    } else {
+    } else if (MATCH("client", "ether")) {
+        pconfig->ether = strdup(value);
+    }else {
         return 0;  /* unknown section/name, error */
     }
     return 1;
@@ -129,6 +139,9 @@ int main(int argc, char**argv){
 
 	client_log("Info", "Connected to server");
 
+	printf("MAC: %s\n", config.ether);
+	printf("MAC size: %d\n", strlen(config.ether));
+
 	//timeout
 	struct timeval tv;
 
@@ -159,7 +172,10 @@ int main(int argc, char**argv){
 				//build response
 				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES);
 
-				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
+				//bit of a hack to break from srrp to send MAC address 
+				memcpy(&((struct srrp_response *)send_buff)->results[0], config.ether, strlen(config.ether) + 1);
+
+				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff) + strlen(config.ether) + 1, 0);
 			}else if(request->type == SRRP_BW){				
 				client_log("Info", "Recevived iperf request - %d bytes", bytes);
 

@@ -5,6 +5,7 @@ cp bin/sensor /usr/bin/sensor
 mkdir -p /etc/sensor
 if ! test -e /etc/sensor/config.ini; then
 	cp config/config.ini /etc/sensor/config.ini
+	sudo printf  "\n[client]\nether=$(ifconfig eth0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')\n" >> /etc/sensor/config.ini
 fi
 
 #run on start up
