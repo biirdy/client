@@ -26,6 +26,7 @@ struct srrp_param{
 #define SRRP_UDP	4       // UDP iperf - reports packet loss and jitter
 #define SRRP_DNS	5       // DNS status 
 #define SRRP_TRT	6       // Traceroute
+#define SRRP_ETHER	10		// MAC address
 
 #define REQUEST_HEADER_LENGTH 8
 

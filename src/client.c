@@ -163,12 +163,19 @@ int main(int argc, char**argv){
 		if(ready == -1 ){
 
 		}else if(ready){
-			bytes = recv(clientSocket,recv_buff, sizeof(recv_buff),0);
+			bytes = recv(clientSocket, recv_buff, sizeof(recv_buff),0);
 			struct srrp_request * request = (struct srrp_request *) recv_buff;
 
 			if(request->type == SRRP_HB){
 				//heatbeat request
 				printf("Received hb request - %d bytes\n", bytes);
+				//build response
+				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES);
+
+				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
+			}else if(request->type == SRRP_ETHER){
+				//ethernet request
+				printf("Received ether request - %d bytes\n", bytes);
 				//build response
 				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES);
 
