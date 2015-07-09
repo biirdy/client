@@ -140,7 +140,6 @@ int main(int argc, char**argv){
 	client_log("Info", "Connected to server");
 
 	printf("MAC: %s\n", config.ether);
-	printf("MAC size: %d\n", strlen(config.ether));
 
 	//timeout
 	struct timeval tv;
@@ -170,14 +169,14 @@ int main(int argc, char**argv){
 				//heatbeat request
 				printf("Received hb request - %d bytes\n", bytes);
 				//build response
-				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES);
+				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES, request->dst_id);
 
 				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 			}else if(request->type == SRRP_ETHER){
 				//ethernet request
 				printf("Received ether request - %d bytes\n", bytes);
 				//build response
-				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES);
+				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES, request->dst_id);
 
 				//bit of a hack to break from srrp to send MAC address 
 				memcpy(&((struct srrp_response *)send_buff)->results[0], config.ether, strlen(config.ether) + 1);
@@ -233,7 +232,7 @@ int main(int argc, char**argv){
 					}else{
 
 						//build response
-						if(parse_iperf(request->type, (struct srrp_response *) send_buff, result)){
+						if(parse_iperf(request->type, request->dst_id, (struct srrp_response *) send_buff, result)){
 							client_log("Error", "Failed to parse iperf response");
 							_exit(0);
 						}
@@ -292,7 +291,7 @@ int main(int argc, char**argv){
 
 					}else{
 
-						if(parse_ping(request->type, (struct srrp_response *) send_buff, result)){
+						if(parse_ping(request->type, request->dst_id, (struct srrp_response *) send_buff, result)){
 							client_log("Error", "Failed to parse ping response");
 							_exit(0);
 						}
@@ -361,7 +360,7 @@ int main(int argc, char**argv){
 						_exit(1);
 					}else{
 
-						if(parse_udp(request->type, (struct srrp_response *) send_buff, result, speed, dscp)){
+						if(parse_udp(request->type, request->dst_id, (struct srrp_response *) send_buff, result, speed, dscp)){
 							client_log("Error", "Failed to parse udp response");
 							_exit(0);
 						}
@@ -411,12 +410,12 @@ int main(int argc, char**argv){
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
 
-						parse_failure(request->type, (struct srrp_response *) send_buff);
+						parse_failure(request->type, request->dst_id, (struct srrp_response *) send_buff);
 
 					}else{
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
 
-						parse_dns(request->type, (struct srrp_response *) send_buff, mtime);
+						parse_dns(request->type, request->dst_id, (struct srrp_response *) send_buff, mtime);
 					}					
 
 					send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
