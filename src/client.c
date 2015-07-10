@@ -139,7 +139,13 @@ int main(int argc, char**argv){
 
 	client_log("Info", "Connected to server");
 
-	printf("MAC: %s\n", config.ether);
+	//get IP of interface - add interface to config file
+	struct ifreq ifr;
+	strncpy(ifr.ifr_name, "en0", IFNAMSIZ-1);
+	ioctl(clientSocket, SIOCGIFADDR, &ifr);
+	struct in_addr local_ip = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr;
+
+	printf("Local IP %s\n", inet_ntoa(local_ip));
 
 	//timeout
 	struct timeval tv;
@@ -180,8 +186,10 @@ int main(int argc, char**argv){
 
 				//bit of a hack to break from srrp to send MAC address 
 				memcpy(&((struct srrp_response *)send_buff)->results[0], config.ether, strlen(config.ether) + 1);
+				//also for the ip
+				memcpy(&((struct srrp_response *)send_buff)->results[0]+ 20, &local_ip, sizeof(local_ip));
 
-				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff) + strlen(config.ether) + 1, 0);
+				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff) /*header*/ + 21 /*mac*/ + sizeof(local_ip) /*ip*/, 0);
 			}else if(request->type == SRRP_BW){				
 				client_log("Info", "Recevived iperf request - %d bytes", bytes);
 
