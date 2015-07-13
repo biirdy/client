@@ -187,9 +187,9 @@ int main(int argc, char**argv){
 				//bit of a hack to break from srrp to send MAC address 
 				memcpy(&((struct srrp_response *)send_buff)->results[0], config.ether, strlen(config.ether) + 1);
 				//also for the ip
-				memcpy(&((struct srrp_response *)send_buff)->results[0]+ 20, &local_ip, sizeof(local_ip));
+				memcpy(&((struct srrp_response *)send_buff)->results[3], &local_ip, sizeof(local_ip));
 
-				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff) /*header*/ + 21 /*mac*/ + sizeof(local_ip) /*ip*/, 0);
+				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff) /*header*/ + 100 /*mac*/ + sizeof(local_ip) /*ip*/, 0);
 			}else if(request->type == SRRP_BW){				
 				client_log("Info", "Recevived iperf request - %d bytes", bytes);
 
@@ -214,7 +214,7 @@ int main(int argc, char**argv){
 					}
 
 					//build command
-					sprintf(cmd, cmd_fmt, config.server_addr, config.tcp_iperf_port, dur);
+					sprintf(cmd, cmd_fmt, inet_ntoa(request->dst_ip), config.tcp_iperf_port, dur);
 
 					printf("%s\n", cmd);
 
@@ -277,7 +277,9 @@ int main(int argc, char**argv){
 					}
 
 					//build command
-					sprintf(command, command_fmt, itterations, config.server_addr);
+					sprintf(command, command_fmt, itterations, inet_ntoa(request->dst_ip));
+
+					printf("Received dst_ip %s\n", inet_ntoa(request->dst_ip));
 
 					printf("%s\n", command);
 
@@ -342,7 +344,7 @@ int main(int argc, char**argv){
 						}
 					}
 
-					sprintf(cmd, cmd_fmt, config.server_addr, config.udp_iperf_port, speed, size, duration, dscp);
+					sprintf(cmd, cmd_fmt, inet_ntoa(request->dst_ip), config.udp_iperf_port, speed, size, duration, dscp);
 
 					printf("%s\n", cmd);
 

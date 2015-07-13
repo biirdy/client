@@ -34,7 +34,7 @@ struct srrp_param{
 struct srrp_request{
 	uint16_t			type;
 	uint16_t			length;
-	uint32_t			dst_ip;
+	struct in_addr		dst_ip;
 	uint32_t			dst_id;
 	struct srrp_param	params[ ];
 } __attribute__((__packed__));
@@ -112,12 +112,12 @@ int response_size(struct srrp_response * response){
 	return (response->length * RESULT_SIZE) + RESPONSE_HEADER_LENGTH;
 }
 
-int request_init(struct srrp_request * request, int type, int id){
+int request_init(struct srrp_request * request, int type, int id, struct in_addr ip){
 
 	request->type = type;
 	request->length = 0;
 	request->dst_id = id;
-	request->dst_ip = 255;
+	request->dst_ip = ip;
 
 	return 1;
 }
