@@ -10,6 +10,8 @@
 #define SRRP_SPEED	4		// Speed
 #define SRRP_DUR 	5		// Duration
 #define SRRP_DSCP	6		// DSCP
+#define SRRP_DN		7		// Domain name 
+#define SRRP_SERVER	8		// server
 
 #define PARAM_SIZE 4
 
@@ -131,6 +133,26 @@ int add_param(struct srrp_request * request, int type, int value){
 	request->length++;
 
 	return(request->length);
+}
+
+int add_param_string(struct srrp_request * request, int type, char * string){
+
+	struct srrp_param param;
+	param.param = type;					//type of sting
+	param.value = ((strlen(string) + PARAM_SIZE) / PARAM_SIZE);	//length of params in value	
+
+	request->params[request->length] = param;
+
+	memcpy(&request->params[request->length + 1], string, strlen(string) + 1);
+	request->length = request->length + ((strlen(string) + PARAM_SIZE) / PARAM_SIZE) + 1;	//ceiling division	 
+
+	return(request->length);
+}
+
+int get_param_string(char ** dst, struct srrp_request * request, int index){
+	*dst = malloc(request->params[index].value * PARAM_SIZE);
+	strcpy(*dst, (char *)&request->params[index+1]);
+	return index + request->params[index].value + 1;
 }
 
 /*

@@ -4,8 +4,9 @@ cp bin/sensor /usr/bin/sensor
 #config
 mkdir -p /etc/sensor
 if ! test -e /etc/sensor/config.ini; then
+	interface=$(awk -F "=" '/interface/ {print $2}' config/config.ini)
 	cp config/config.ini /etc/sensor/config.ini
-	sudo printf  "\n[client]\nether=$(ifconfig eth0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')\n" >> /etc/sensor/config.ini
+	sudo printf  "\nether=$(ifconfig $interface | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')\n" >> /etc/sensor/config.ini
 fi
 
 #run on start up

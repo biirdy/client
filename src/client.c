@@ -42,6 +42,8 @@ typedef struct{
 
     //MAC address - unique ID
     const char* ether;
+
+    const char* interface;
 } configuration;
 configuration config;
 
@@ -61,6 +63,8 @@ static int handler(void* user, const char* section, const char* name, const char
         pconfig->nslookup_addr = strdup(value);
     } else if (MATCH("client", "ether")) {
         pconfig->ether = strdup(value);
+    } else if (MATCH("client", "interface")) {
+        pconfig->interface = strdup(value);
     }else {
         return 0;  /* unknown section/name, error */
     }
@@ -141,7 +145,7 @@ int main(int argc, char**argv){
 
 	//get IP of interface - add interface to config file
 	struct ifreq ifr;
-	strncpy(ifr.ifr_name, "en0", IFNAMSIZ-1);
+	strncpy(ifr.ifr_name, config.interface, IFNAMSIZ-1);
 	ioctl(clientSocket, SIOCGIFADDR, &ifr);
 	struct in_addr local_ip = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr;
 
@@ -384,16 +388,37 @@ int main(int argc, char**argv){
 				}
 
 			}else if(request->type == SRRP_DNS){
-				client_log("Info", "Received dns request");
+				client_log("Info", "Received dns request - %d bytes", bytes);
 
 				if(fork() == 0){
 					//listen for SIGCHLD so pclose resturns the status 
 					signal(SIGCHLD, SIG_DFL);
 
-					char * cmd_fmt = "nslookup %s";
+					char * cmd_fmt = "nslookup %s %s";
 					char cmd[100];
 
-					sprintf(cmd, cmd_fmt, config.nslookup_addr);
+					char * domain_name 	= NULL;
+					char * server 		= NULL;
+
+					int i = 0;
+					while(i < request->length){
+						if(request->params[i].param == SRRP_DN){
+							i = get_param_string(&domain_name, request, i);	
+						}else if(request->params[i].param == SRRP_SERVER){
+							i = get_param_string(&server, request, i);
+						}else{
+							client_log("Error", "Invalid param");
+						}
+					}
+
+					if(!server || strcmp(server, "default") == 0)
+						server = "";
+					if(!domain_name || strcmp(server, "default") == 0)
+						domain_name = (char *)config.nslookup_addr;
+
+					sprintf(cmd, cmd_fmt, domain_name, server);
+
+					printf("%s\n", cmd);
 
 					struct timeval start, end;
 					float mtime, secs, usecs;
@@ -433,7 +458,6 @@ int main(int argc, char**argv){
 					client_log("Info", "Sending dns response");				
 
 					_exit(0);
-
 				}
 
 			}else{
