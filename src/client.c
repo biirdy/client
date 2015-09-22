@@ -179,14 +179,14 @@ int main(int argc, char**argv){
 				//heatbeat request
 				printf("Received hb request - %d bytes\n", bytes);
 				//build response
-				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES, request->dst_id);
+				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES, request->dst_id, request->m_id);
 
 				send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
 			}else if(request->type == SRRP_ETHER){
 				//ethernet request
 				printf("Received ether request - %d bytes\n", bytes);
 				//build response
-				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES, request->dst_id);
+				response_init((struct srrp_response *) send_buff, request->type, SRRP_SCES, request->dst_id, request->m_id);
 
 				//bit of a hack to break from srrp to send MAC address 
 				memcpy(&((struct srrp_response *)send_buff)->results[0], config.ether, strlen(config.ether) + 1);
@@ -219,7 +219,6 @@ int main(int argc, char**argv){
 
 					//build command
 					sprintf(cmd, cmd_fmt, inet_ntoa(request->dst_ip), config.tcp_iperf_port, dur);
-
 					printf("%s\n", cmd);
 
 					fp = popen(cmd, "r");
@@ -227,8 +226,6 @@ int main(int argc, char**argv){
 						client_log("Error", "Failed to run command '%s'", cmd);
 						_exit(1);
 					}
-
-					printf("Running iperf command\n");
 
 					//get otuput	-	single line because of -y C flage
 					char result[100];
@@ -244,7 +241,7 @@ int main(int argc, char**argv){
 					}else{
 
 						//build response
-						if(parse_iperf(request->type, request->dst_id, (struct srrp_response *) send_buff, result)){
+						if(parse_iperf(request->type, request->dst_id, request->m_id, (struct srrp_response *) send_buff, result)){
 							client_log("Error", "Failed to parse iperf response");
 							_exit(0);
 						}
@@ -282,9 +279,6 @@ int main(int argc, char**argv){
 
 					//build command
 					sprintf(command, command_fmt, itterations, inet_ntoa(request->dst_ip));
-
-					printf("Received dst_ip %s\n", inet_ntoa(request->dst_ip));
-
 					printf("%s\n", command);
 
 					fp = popen(command , "r");
@@ -305,7 +299,7 @@ int main(int argc, char**argv){
 
 					}else{
 
-						if(parse_ping(request->type, request->dst_id, (struct srrp_response *) send_buff, result)){
+						if(parse_ping(request->type, request->dst_id, request->m_id, (struct srrp_response *) send_buff, result)){
 							client_log("Error", "Failed to parse ping response");
 							_exit(0);
 						}
@@ -360,9 +354,8 @@ int main(int argc, char**argv){
 
 					//get otuput	-	single line because of -y C flage
 					char result[200];
-					while(fgets(result, sizeof(result)-1, fp) != NULL){
+					while(fgets(result, sizeof(result)-1, fp) != NULL)
 						printf("%s\n", result);
-					}
 
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
@@ -374,7 +367,7 @@ int main(int argc, char**argv){
 						_exit(1);
 					}else{
 
-						if(parse_udp(request->type, request->dst_id, (struct srrp_response *) send_buff, result, speed, dscp)){
+						if(parse_udp(request->type, request->dst_id, request->m_id, (struct srrp_response *) send_buff, result, speed, dscp)){
 							client_log("Error", "Failed to parse udp response");
 							_exit(0);
 						}
@@ -444,13 +437,10 @@ int main(int argc, char**argv){
 					int exit_status = pclose(fp);
 					if(exit_status != 0){
 						client_log("Info", "DNS status failure - exit status %d", exit_status);
-
-						parse_failure(request->type, request->dst_id, (struct srrp_response *) send_buff);
-
+						parse_failure(request->type, request->dst_id, request->m_id, (struct srrp_response *) send_buff);
 					}else{
 						client_log("Info", "DNS status sucess - exit status %d", exit_status);	
-
-						parse_dns(request->type, request->dst_id, (struct srrp_response *) send_buff, mtime);
+						parse_dns(request->type, request->dst_id, request->m_id, (struct srrp_response *) send_buff, mtime);
 					}					
 
 					send(clientSocket, send_buff, response_size((struct srrp_response *) send_buff), 0);
