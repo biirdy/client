@@ -99,7 +99,7 @@ void client_log(const char * type, const char * fmt, ...){
 int main(int argc, char**argv){
 
 	//log files
-	logs = fopen("/var/log/sensor/sensor.log", "a+");
+	logs = fopen("/var/log/weperf/sensor/sensor.log", "a+");
 
 	int clientSocket;
 	char buffer[1024];
@@ -109,7 +109,7 @@ int main(int argc, char**argv){
 	socklen_t addr_size;
 
 	//parse configurations from file
-    if (ini_parse("/etc/sensor/config.ini", handler, &config) < 0) {
+    if (ini_parse("/etc/weperf/sensor-config.ini", handler, &config) < 0) {
         client_log("Error", "Can't load 'config.ini'\n");
         return 1;
     }

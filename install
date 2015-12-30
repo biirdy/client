@@ -1,19 +1,28 @@
-#executables
-cp bin/sensor /usr/bin/sensor
+#!/bin/bash
+
+#TODO: have options whether to install rc.local (startup) files 
+
+#install executables
+cp bin/weperf-sensor /usr/bin/weperf-sensor
 
 #config
-mkdir -p /etc/sensor
-if ! test -e /etc/sensor/config.ini; then
+mkdir -p /etc/weperf
+if ! test -e /etc/weperf/sensor-config.ini; then
+	#get sensor interface name - should have already been placed in config/sensor-config.ini - default eth0
 	interface=$(awk -F "=" '/interface/ {print $2}' config/config.ini)
-	cp config/config.ini /etc/sensor/config.ini
-	sudo printf  "\nether=$(ifconfig $interface | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')\n" >> /etc/sensor/config.ini
+
+	#install config file
+	cp config/sensor-config.ini /etc/weperf/sensor-config.ini
+
+	#put MAC address of interface to config file - could be done manually if step missed
+	sudo printf  "\nether=$(ifconfig $interface | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')\n" >> /etc/weperf/sensor-config.ini
 fi
 
 #run on start up
 cp startup/rc.local /etc/rc.local
-cp startup/sensor_loop /usr/bin/sensor_loop
+cp startup/weperf-forever /usr/bin/weperf-forever
 
 #mkae log dir
-mkdir -p /var/log/sensor
-touch /var/log/sensor/sensor.log
+mkdir -p /var/log/weperf/sensor
+touch /var/log/weperf/sensor/sensor.log
 

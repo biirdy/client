@@ -1,2 +1,2 @@
 mkdir -p bin
-gcc -o bin/sensor src/client.c
+gcc -o bin/weperf-sensor src/client.c
